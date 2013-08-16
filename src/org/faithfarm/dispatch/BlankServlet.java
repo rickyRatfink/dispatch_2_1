@@ -14,7 +14,7 @@ public class BlankServlet extends HttpServlet {
 			   throws ServletException, IOException
 			   {
 			      HttpSession session = req.getSession(true);
-	 }
+	 } 
 	 
 	 protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			 throws ServletException, IOException
