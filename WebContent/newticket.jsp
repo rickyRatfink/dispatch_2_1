@@ -243,8 +243,8 @@ function ucase(obj) {
                             </tr>
                                                        
                             <tr>
-                            	<td class="searchField"><input type="text" size="30" maxlength="40" name="lastname" value="<%=DispatchServlet.getDonor().getLastname() %>" <% if (f1Err.length()>0){%> class="textboxErr"<% } else { %> class="textbox"<%}%> onkeyup="ucase(this)" /></td>
-                                <td class="searchField"><input type="text" size="20" maxlength="40" name="firstname"  value="<%=DispatchServlet.getDonor().getFirstname() %>" <% if (f2Err.length()>0){%> class="textboxErr"<% } else { %> class="textbox"<%}%> onkeyup="ucase(this)" /></td>
+                            	<td class="searchField"><input type="text" size="20" maxlength="40" name="firstname"  value="<%=DispatchServlet.getDonor().getFirstname() %>" <% if (f2Err.length()>0){%> class="textboxErr"<% } else { %> class="textbox"<%}%> onkeyup="ucase(this)" /></td>
+                                <td class="searchField"><input type="text" size="30" maxlength="40" name="lastname" value="<%=DispatchServlet.getDonor().getLastname() %>" <% if (f1Err.length()>0){%> class="textboxErr"<% } else { %> class="textbox"<%}%> onkeyup="ucase(this)" /></td>
                                 <td class="searchField">
                                 	<%
                                      ArrayList ddl = (ArrayList)session.getAttribute("dllSuffix");
@@ -277,8 +277,8 @@ function ucase(obj) {
                             </tr>    
                             
                              <tr>
-                            	<td class="fieldError"><%=f1Err%></td>
-                                <td class="fieldError"><%=f2Err%></td>
+                            	<td class="fieldError"><%=f2Err%></td>
+                                <td class="fieldError"><%=f1Err%></td>
                                 <td></td>
                                 <td</td>
                             </tr>
