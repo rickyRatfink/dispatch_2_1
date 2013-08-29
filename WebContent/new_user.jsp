@@ -1,14 +1,14 @@
 <%@ page import="org.faithfarm.dispatch.DispatchServlet" %>
 <%@ page import="org.faithfarm.domain.SystemUser" %>
 <%@ page import="java.util.ArrayList" %>
-
+ 
 <%
 
 	String required = "<img src='images/required.png'/>"; 
     String f1Err = (String)request.getAttribute("field1Err");
 	String f2Err = (String)request.getAttribute("field2Err");
 	if (f1Err==null) f1Err="";
-	if (f2Err==null) f2Err="";
+	if (f2Err==null) f2Err=""; 
 	
 	ArrayList results = (ArrayList)session.getAttribute("RESULTS_"+session.getId());
 	if (results==null) results=new ArrayList();

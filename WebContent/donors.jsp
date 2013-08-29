@@ -5,8 +5,8 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Date" %>
- 
-<%
+  
+<% 
  
 	String required = "<img src='images/required.png'/>"; 
     String f1Err = (String)request.getAttribute("field1Err");

@@ -3,14 +3,14 @@
 <%@ page import="org.faithfarm.domain.Donor" %>
 <%@ page import="org.faithfarm.domain.Address" %>
 <%@ page import="java.util.ArrayList" %>
-
+ 
 <%
 
 	String required = "<img src='images/required.png'/>"; 
     String f1Err = (String)request.getAttribute("field1Err");
 	String f2Err = (String)request.getAttribute("field2Err");
 	if (f1Err==null) f1Err="";
-	if (f2Err==null) f2Err="";
+	if (f2Err==null) f2Err=""; 
 	
 	ArrayList results = (ArrayList)session.getAttribute("RESULTS_"+session.getId());
 	if (results==null) results=new ArrayList();
@@ -46,7 +46,8 @@ function ucase(obj) {
             	<td align="center" bgcolor="#FFFFFF" >
                        <table width="800" cellpadding="0" cellspacing="0" border="0" class="grid">
                         	 <tr>
-                            	<td colspan="9" height="25" bgcolor="#3b3f41">&nbsp;&nbsp;Donations</td>
+                            	<td colspan="7" height="25" bgcolor="#3b3f41">&nbsp;&nbsp;Donations</td>
+                            	<td bgcolor="#3b3f41" alight="right"><a href="<%=request.getContextPath()%>/ticket?action=Print"><img src="images/printer.png" height="20" width="20" title="Print Dispatches" alt="Print Dispatches"/></a></td>
                             </tr>   
                             <tr>
                             	<td height="23" valign="center" background="images/searchGroupBk.png" class="searchMenuHeader">
@@ -77,7 +78,7 @@ function ucase(obj) {
                                             <td width="3" height="18" background="images/searchHeaderSpacer.png"></td>
                                             <td height="18" background="images/searchHeaderBk.png" class="searchFieldHeader">AGENT</td>
                                         </tr>
-                                        <%
+                                        <% 
 										for (int i=0;i<results.size();i++) {
 											Donation d = (Donation)results.get(i);
 											Donor donor = d.getDonor();

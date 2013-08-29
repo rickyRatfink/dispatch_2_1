@@ -132,12 +132,12 @@ public class SecureLogin extends HttpServlet {
 	        states.add("Wyoming");
 	 
 	        ArrayList status = new ArrayList();
+	        status.add("Pending");
 	        status.add("Assigned");
 	        status.add("Cancelled by Donor");
 	        status.add("Completed");
 	        status.add("In Route");
 	        status.add("No Response");
-	        status.add("Pending");
 	        status.add("Reschedule");
 	        status.add("10/5");
 	        

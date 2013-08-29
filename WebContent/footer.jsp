@@ -6,7 +6,7 @@
 					</div>
 				</td>
 			</tr>
-		</table>
+		</table> 
 </td>
 <td width="20%"></td>
 </tr>

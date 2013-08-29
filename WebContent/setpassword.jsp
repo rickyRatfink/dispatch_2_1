@@ -1,7 +1,7 @@
 <%@ page import="org.faithfarm.dispatch.DispatchServlet" %>
 <%@ page import="java.util.ArrayList" %>
 
-<%
+<% 
 
 	String required = "<img src='images/required.png'/>"; 
     String f1Err = (String)request.getAttribute("field1Err");

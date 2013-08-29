@@ -6,7 +6,7 @@
 	String f2Err = (String)request.getAttribute("field2Err");
 	if (f1Err==null) f1Err="";
 	if (f2Err==null) f2Err="";
-%>
+%> 
 <jsp:include page="header.jsp" flush="true"/>
 
 <script language="javascript" type="text/javascript">

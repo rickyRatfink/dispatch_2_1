@@ -3,8 +3,8 @@
 <%@ page import="java.util.Date" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="org.faithfarm.domain.SystemUser" %>
-
-<% 
+   
+<%   
 	  SystemUser user = (SystemUser)session.getAttribute("USER_"+session.getId()); 
 	  if (user==null) user=new SystemUser();
 %>

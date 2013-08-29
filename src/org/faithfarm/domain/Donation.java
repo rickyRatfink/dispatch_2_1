@@ -4,87 +4,59 @@ import java.io.Serializable;
 
 public class Donation implements Serializable {
 
-	private Long donationId;
-	private Long donorId;
+	private   Long donationId;
+	private   Long donorId;
 	
-	private String status;
-	private String dispatchDate;
-	private String specialFlag;
-	private String callRequirements;
-	private String confirmation;
-	private String ac;
-	private String bedding;
-	private String beddingQtyType;
-	private String books;
-	private String booksQtyType;
-	private String clothing;
-	private String clothingQtyType;
-	private String computer;
-	private String desk;
-	private String chest;
-	private String armoire;
-	private String dresser;
-	private String mirror;
-	private String nightstand;
-	private String headboard;
-	private String footboard;
-	private String rails;
-	private String lamp;
-	private String lawnFurniture;
-	private String mattress;
-	private String mattressQtyType;
-	private String miscHouseholdItems;
-	private String refridgerator;
-	private String stove;
-	private String recliner;
-	private String sofa;
-	private String loveseat;
-	private String wallUnit;
-	private String table;
-	private String chair;
-	private String television;
-	private String televisionSize;
-	private String electronics;
-	private String washer;
-	private String dryer;
-	private String exerciseEquipment;
-	private String specialNotes;
-	private String creationDate;
-	private String createdBy;
-	private String lastUpdatedDate;
-	private String updatedBy;
-	private String farmBase;
+	private   String status="";
+	private   String dispatchDate="";
+	private   String specialFlag="";
+	private   String callRequirements="";
+	private   String confirmation="";
+	private   String ac="";
+	private   String bedding="";
+	private   String beddingQtyType="";
+	private   String books="";
+	private   String booksQtyType="";
+	private   String clothing="";
+	private   String clothingQtyType="";
+	private   String computer="";
+	private   String desk="";
+	private   String chest="";
+	private   String armoire="";
+	private   String dresser="";
+	private   String mirror="";
+	private   String nightstand="";
+	private   String headboard="";
+	private   String footboard="";
+	private   String rails="";
+	private   String lamp="";
+	private   String lawnFurniture="";
+	private   String mattress="";
+	private   String mattressQtyType="";
+	private   String miscHouseholdItems="";
+	private   String refridgerator="";
+	private   String stove="";
+	private   String recliner="";
+	private   String sofa="";
+	private   String loveseat="";
+	private   String wallUnit="";
+	private   String table="";
+	private   String chair="";
+	private   String television="";
+	private   String televisionSize="";
+	private   String electronics="";
+	private   String washer="";
+	private   String dryer="";
+	private   String exerciseEquipment="";
+	private   String specialNotes="";
+	private   String creationDate="";
+	private   String createdBy="";
+	private   String lastUpdatedDate="";
+	private   String updatedBy="";
+	private   String farmBase="";
 	
-	private Donor donor;
-	private Address address;
-	
-	
-	
-	
-	public String getFarmBase() {
-		return farmBase;
-	}
-	public void setFarmBase(String farmBase) {
-		this.farmBase = farmBase;
-	}
-	public Donor getDonor() {
-		return donor;
-	}
-	public void setDonor(Donor donor) {
-		this.donor = donor;
-	}
-	public Address getAddress() {
-		return address;
-	}
-	public void setAddress(Address address) {
-		this.address = address;
-	}
-	public String getConfirmation() {
-		return confirmation;
-	}
-	public void setConfirmation(String confirmation) {
-		this.confirmation = confirmation;
-	}
+	private   Donor donor=new Donor();
+	private   Address address=new Address();
 	public Long getDonationId() {
 		return donationId;
 	}
@@ -120,6 +92,12 @@ public class Donation implements Serializable {
 	}
 	public void setCallRequirements(String callRequirements) {
 		this.callRequirements = callRequirements;
+	}
+	public String getConfirmation() {
+		return confirmation;
+	}
+	public void setConfirmation(String confirmation) {
+		this.confirmation = confirmation;
 	}
 	public String getAc() {
 		return ac;
@@ -343,11 +321,23 @@ public class Donation implements Serializable {
 	public void setSpecialNotes(String specialNotes) {
 		this.specialNotes = specialNotes;
 	}
+	public String getCreationDate() {
+		return creationDate;
+	}
+	public void setCreationDate(String creationDate) {
+		this.creationDate = creationDate;
+	}
 	public String getCreatedBy() {
 		return createdBy;
 	}
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
+	}
+	public String getLastUpdatedDate() {
+		return lastUpdatedDate;
+	}
+	public void setLastUpdatedDate(String lastUpdatedDate) {
+		this.lastUpdatedDate = lastUpdatedDate;
 	}
 	public String getUpdatedBy() {
 		return updatedBy;
@@ -355,17 +345,23 @@ public class Donation implements Serializable {
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
 	}
-	public String getCreationDate() {
-		return creationDate;
+	public String getFarmBase() {
+		return farmBase;
 	}
-	public void setCreationDate(String creationDate) {
-		this.creationDate = creationDate;
+	public void setFarmBase(String farmBase) {
+		this.farmBase = farmBase;
 	}
-	public String getLastUpdatedDate() {
-		return lastUpdatedDate;
+	public Donor getDonor() {
+		return donor;
 	}
-	public void setLastUpdatedDate(String lastUpdatedDate) {
-		this.lastUpdatedDate = lastUpdatedDate;
+	public void setDonor(Donor donor) {
+		this.donor = donor;
+	}
+	public Address getAddress() {
+		return address;
+	}
+	public void setAddress(Address address) {
+		this.address = address;
 	}
 	
 	

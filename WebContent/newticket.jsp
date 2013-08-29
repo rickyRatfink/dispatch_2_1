@@ -1,13 +1,13 @@
 <%@ page import="org.faithfarm.dispatch.DispatchServlet" %>
 <%@ page import="java.util.ArrayList" %>
 
-
+ 
 <%
 String update = request.getParameter("update");
 if (update==null) update="";
 %>
 
-<script type="text/javascript">
+<script type="text/javascript"> 
 
 function moveOnMax(field,nextFieldID){
 	  if(field.value.length >= field.maxLength){
@@ -476,12 +476,12 @@ function ucase(obj) {
                                     %>
                                   </select>
                                 </td>
-                                <td><input type="text" size="5" maxlength="5" name="building" value="<%=DispatchServlet.getAddress().getBuilding() %>" class="textbox"  class="textbox" /></td>
-                                <td><input type="text" size="5" maxlength="5" name="floor" value="<%=DispatchServlet.getAddress().getFloor() %>" class="textbox" class="textbox" /></td>
+                                <td><input type="text" size="5" maxlength="5" name="unit" value="<%=DispatchServlet.getAddress().getUnit() %>" class="textbox"  class="textbox" /></td>
+                                <td><input type="text" size="5" maxlength="5" name="building" value="<%=DispatchServlet.getAddress().getBuilding() %>" class="textbox" class="textbox" /></td>
                                 <td>
                                 	<%
                                      ddl = (ArrayList)session.getAttribute("dllFloor");
-                                  %>
+                                    %>
                                   <select name="floor" <% if (f9Err.length()>0){%> class="ddlErr"<% } else { %> class="ddl"<%}%>>
                                     <option value="">
                                     </option>
@@ -491,10 +491,10 @@ function ucase(obj) {
                                         %>
                                         <option 
                                             value="<%=ddl.get(j)%>"
-                                            <%
+                                            <% String sFloor = ddl.get(j)+"";
                                             if
-                                            (ddl.get(j).equals(DispatchServlet.getAddress().getFloor()))
-                                            {%>selected<%}%>>
+                                            (sFloor.equals(DispatchServlet.getAddress().getFloor()))
+                                            { %>selected<%}%>>
 
 
                                           <%=ddl.get(j)%>
@@ -521,11 +521,11 @@ function ucase(obj) {
                         
                          <table width="95%" cellpadding="0" cellspacing="0" border="0">
                         	<tr>
-                            	<td width="5" class="fieldHeading" ><input type="checkbox" name="elevatorFlag" value="YES" <% if (DispatchServlet.getAddress().getElevatorFlag().equals("Y")) {%>checked<%}%>/></td>
+                            	<td width="5" class="fieldHeading" ><input type="checkbox" name="elevatorFlag" value="YES" <% if (DispatchServlet.getAddress().getElevatorFlag().equals("YES")) {%>checked<%}%>/></td>
                                 <td class="fieldHeading" >Check if elevator access is available</td>
                             </tr> 
                             <tr>
-                            	<td width="5" class="fieldHeading" ><input type="checkbox" name="gateFlag" value="YES" <% if (DispatchServlet.getAddress().getGateFlag().equals("Y")) {%>checked<%}%>/></td>
+                            	<td width="5" class="fieldHeading" ><input type="checkbox" name="gateFlag" value="YES" <% if (DispatchServlet.getAddress().getGateFlag().equals("YES")) {%>checked<%}%>/></td>
                                 <td class="fieldHeading" >Check if community is gated</td>
                             </tr> 
                             <tr>
@@ -575,6 +575,36 @@ function ucase(obj) {
                          <h1>Donation Details</h1>
                          
                             <table width="95%" cellpadding="0" cellspacing="0" border="0">
+                        	<tr>
+                            	<td width="120" class="fieldHeading" >Status<%=required%></td>
+                            </tr>
+                            <tr>
+                            	<td>
+                            	    <select name="status"  class="ddl">
+                                    
+                                    <%
+                                    ddl = (ArrayList)session.getAttribute("dllStatus");
+                                    if (ddl!=null) {
+                                      for (int j=0;j<ddl.size();j++) {
+                                        %>
+                                        <option 
+                                            value="<%=ddl.get(j)%>"
+                                            <%
+                                            if
+                                            (ddl.get(j).equals(DispatchServlet.getDonation().getStatus()))
+                                            {%>selected<%}%>>
+                                          <%=ddl.get(j)%>
+                                        </option>
+                                        <%
+                                      }
+                                      %>
+                                      <%
+                                    }
+                                    %>
+                                  </select>
+                            	</td>
+                            </tr>
+                        	
                         	<tr>
                             	<td width="120" class="fieldHeading" >Dispatch Date<%=required%></td>
                             </tr>
@@ -900,13 +930,13 @@ function ucase(obj) {
                          
                          <% if ("Y".equals(update)) { %>
 							<input type="submit" name="action" value="Update Ticket" title="Update Ticket" />
-                         	<input type="submit" name="action" value="Update & Print" title="Update Ticket & Print" />
+                         	<!-- <input type="submit" name="action" value="Update & Print" title="Update Ticket & Print" /> -->
                             <input type="hidden" name="donorId" value="<%=DispatchServlet.getDonor().getDonorId() %>"/>
                             <input type="hidden" name="addressId" value="<%=DispatchServlet.getAddress().getAddressId() %>"/>
                             <input type="hidden" name="donationId" value="<%=DispatchServlet.getDonation().getDonationId() %>"/>
                          <% } else { %>
-                         	<input type="submit" name="action" value="Save Ticket" class="imageButtonSave" title="Save Ticket" />
-                         	<input type="submit" name="action" value="Save & Print" class="imageButtonPrint" title="Save Ticket & Print" />
+                         	<input type="submit" name="action" value="Save Ticket"  title="Save Ticket" />
+                         	<!-- <input type="submit" name="action" value="Save & Print" class="imageButtonPrint" title="Save Ticket & Print" /> -->
                          <% } %>
                           
                		

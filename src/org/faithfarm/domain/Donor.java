@@ -5,15 +5,15 @@ import java.io.Serializable;
 public class Donor implements Serializable {
 	
 	private Long donorId;
-	private String firstname;
-	private String lastname;
-	private String suffix;
-	private String emailAddress;
-	private String contactPhone;
-	private String creationDate;
-	private String lastUpdatedDate;
-	private String createdBy;
-	private String udpatedBy;
+	private String firstname="";
+	private String lastname="";
+	private String suffix="";
+	private String emailAddress="";
+	private String contactPhone="";
+	private String creationDate="";
+	private String lastUpdatedDate="";
+	private String createdBy="";
+	private String udpatedBy="";
 	
 	
 	public Long getDonorId() {

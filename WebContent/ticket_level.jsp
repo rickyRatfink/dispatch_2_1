@@ -1,6 +1,6 @@
 <%@ page import="org.faithfarm.dispatch.DispatchServlet" %>
 <%@ page import="java.util.ArrayList" %>
-
+  
 <%
 
 	String required = "<img src='images/required.png'/>"; 
@@ -13,7 +13,7 @@
 
 <style type="text/css">
 #input {}
-.textbox1 {
+.textbox1 { 
 	border:1px solid #456879;
 	border-radius:3px;
 	height: 13px;

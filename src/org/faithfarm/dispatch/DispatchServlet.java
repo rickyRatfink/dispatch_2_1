@@ -1,6 +1,11 @@
 package org.faithfarm.dispatch;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,14 +20,14 @@ import org.faithfarm.domain.SystemUser;
 import org.faithfarm.service.data.DispatchDao;
 import org.faithfarm.util.Validator;
 
-public class DispatchServlet extends HttpServlet {
-
+public class DispatchServlet extends HttpServlet { 
+ 
 	private DispatchDao dao = new DispatchDao();
 	private static Donor donor = new Donor();
 	private static Address address = new Address();
 	private static Donation donation = new Donation();
 	private static SystemUser systemUser = new SystemUser();
-	
+	private static ArrayList donations = new ArrayList();
 	private static String dispatchDate="";
 	private static String limit="";
 	
@@ -32,32 +37,110 @@ public class DispatchServlet extends HttpServlet {
 		String action = req.getParameter("action");
 		Validator valid8r = new Validator();
 		boolean pass1 = false;
+		String url="main.jsp";
+			
+		try {
 		
 		SystemUser user = (SystemUser)session.getAttribute("USER_"+session.getId());
+		if (user==null) 
+			url="index.jsp";
 		
+		else {
+			
 		this.setFields(req);
 		
-		if ("New".equals(action)) {
+		if ("Home".equals(action)) {
+			GregorianCalendar calendar = new GregorianCalendar();
+			
+			Date now = calendar.getTime();
+			DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+			DateFormat df2 = new SimpleDateFormat("EEEE");
+			int limit = dao.getDailyLimit(df.format(now), session);
+			int count = dao.getDailyDispatchCount(df.format(now), session);
+			
+			req.setAttribute("LIMIT1", limit+"");
+			req.setAttribute("COUNT1", count+"");
+			req.setAttribute("DATE1", df2.format(now).substring(0,3)+" "+df.format(now));
+						
+			//Advance the calendar one day: 
+			for (int day=1;day<7;day++) {
+				Date tomorrow = calendar.getTime();
+				tomorrow.setTime(now.getTime() + (24*day)*60*60*1000);
+				String formattedDate = df.format(tomorrow);
+				String sDay = df2.format(tomorrow);
+				
+				limit = dao.getDailyLimit(formattedDate, session);
+				count = dao.getDailyDispatchCount(formattedDate, session);
+				req.setAttribute("LIMIT"+(day+1), limit+"");
+				req.setAttribute("COUNT"+(day+1), count+"");
+				req.setAttribute("DATE"+(day+1), sDay.substring(0,3)+" "+formattedDate);
+			}
+						
+			url="/main.jsp";
+			
+		}
+		else if ("SearchDonor".equals(action)) {
+			String firstname = req.getParameter("firstname");
+			String lastname = req.getParameter("lastname");
+			int retCode = dao.getDonors(firstname, lastname, session);
+			
+			if (retCode!=1)
+				url="error.jsp";
+			else 
+				url="donors.jsp";
+		}
+		else if ("SelectDonor".equals(action)) {
+			String sId1 = req.getParameter("id1");
+			String sId2 = req.getParameter("id2");
+			Long donorId = new Long(sId1);
+			Long addyId = new Long(sId2);
+			
+			Donor donor = dao.getDonor(donorId, session);
+			Address addy = dao.getAddress(addyId,session);
+			this.setDonor(donor);
+			this.setAddress(addy);
+			url="/newticket.jsp";
+		}
+		else if ("New".equals(action)) {
 			this.setDonation(new Donation());
 			this.setDonor(new Donor());
 			this.setAddress(new Address());
 			
 			this.setFields(req);
 			
-			req.getRequestDispatcher("/newticket.jsp").forward(req, resp);
+			url="newticket.jsp";
 		}
 		else if ("Search".equals(action)) {
 			this.setDonation(new Donation());
 			this.setDonor(new Donor());
 			this.setAddress(new Address());
 			this.setFields(req);
-			session.setAttribute("RESULTS_"+session.getId(),null);
-			req.getRequestDispatcher("/search.jsp").forward(req, resp);
+			Date ddate = new java.util.Date();
+			DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+			int retCode = dao.searchTickets("", "", "", df.format(ddate), session);
+			if (retCode!=1)
+				url="error.jsp";
+			else 
+				url="search.jsp";
+						
+		} 
+		else if ("Print".equals(action)) {
+			this.setDonation(new Donation());
+			this.setDonor(new Donor());
+			this.setAddress(new Address());
+			this.setFields(req);
+			Date ddate = new java.util.Date();
+			DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+			int retCode = dao.searchTickets("", "", "", df.format(ddate), session);
+			if (retCode!=1)
+				url="error.jsp";
+			else 
+				url="print_all_dispatches.jsp";
 		}
 		else if ("Level".equals(action)) {
 			this.setDispatchDate("");
 			this.setLimit("");
-			req.getRequestDispatcher("/ticket_level.jsp").forward(req, resp);
+			url="ticket_level.jsp";
 		}
 		else if ("SaveLevel".equals(action)) {
 			boolean success=true;
@@ -89,7 +172,7 @@ public class DispatchServlet extends HttpServlet {
 			int retCode =0;
 			
 			if (!success) 
-				req.getRequestDispatcher("/ticket_level.jsp").forward(req, resp);
+				url="ticket_level.jsp";
 			else {
 				retCode = dao.updateDailyLimit(dispatchDate, limit, user.getFarmBase(), user.getUsername(), session);
 				//insert new limit if limit doesn't exist
@@ -97,15 +180,15 @@ public class DispatchServlet extends HttpServlet {
 					
 					retCode=dao.insertDailyLimit(dispatchDate, limit, user.getFarmBase(), user.getUsername(), session);
 					if (retCode!=1)
-						req.getRequestDispatcher("/error.jsp").forward(req, resp);
+						url="error.jsp";
 					else {
 						req.setAttribute("MESSAGE", "daily limit successfully set.");
-						req.getRequestDispatcher("/newticket.jsp").forward(req, resp);
+						url="newticket.jsp";
 					}
 				}
 				else {
 					req.setAttribute("MESSAGE", "daily limit successfully updated.");
-					req.getRequestDispatcher("/newticket.jsp").forward(req, resp);
+					url="newticket.jsp";
 				}
 			}
 		}
@@ -121,9 +204,9 @@ public class DispatchServlet extends HttpServlet {
 			
 			int retCode = dao.searchTickets(lastname, firstname, confirmation, dispatchDate, session);
 			if (retCode!=1)
-				req.getRequestDispatcher("/error.jsp").forward(req, resp);
+				url="error.jsp";
 			else {
-				req.getRequestDispatcher("/search.jsp").forward(req, resp);
+				url="search.jsp";
 			}
 		} 
 		else if ("ChangePassword".equals(action)) {
@@ -138,52 +221,121 @@ public class DispatchServlet extends HttpServlet {
 				int retCode = dao.updateLoginCount(user.getUserId(), session);
 				retCode = dao.updatePassword(user.getUserId(), pwd1, question, answer, session);
 				if (retCode!=1)
-					req.getRequestDispatcher("/error.jsp").forward(req, resp);
+					url="error.jsp";
 				else {
 					req.setAttribute("MESSAGE_"+session.getId(),"Password successfully changed");
-					req.getRequestDispatcher("/main.jsp").forward(req, resp);
+					url="main.jsp";
 				}
 			} else
-				req.getRequestDispatcher("/setpassword.jsp").forward(req, resp);
+				url="setpassword.jsp";
+		}
+		else if ("Update".equals(action)) {
+			String sDonorId = req.getParameter("id1");
+			String sAddyId = req.getParameter("id2");
+			String sDonationId = req.getParameter("id3");
+			Long donorId = new Long(sDonorId);
+			Long addyId = new Long(sAddyId);
+			Long donationId = new Long(sDonationId);
+		    this.setDonor(dao.getDonor(donorId, session));
+			this.setAddress(dao.getAddress(addyId, session));
+			this.setDonation(dao.getDonation(donationId, session));
+			url="newticket.jsp?update=Y";
+		}
+		else if ("Update Ticket".equals(action)) {
+			String sDonorId = req.getParameter("donorId");
+			String sAddyId = req.getParameter("addressId");
+			String sDonationId = req.getParameter("donationId");
+			Long donorId = new Long(sDonorId);
+			Long addyId = new Long(sAddyId);
+			Long donationId = new Long(sDonationId);
+			
+			pass1 = validateTicket(req);
+			if (pass1) {
+				donor.setDonorId(donorId);
+				donor.setLastUpdatedDate(valid8r.getEpoch()+"");
+				donor.setUdpatedBy(user.getUsername());
+				int retCode=dao.updateDonor(donor, session);
+				if (retCode!=1)
+					url="error.jsp";
+				else {
+					address.setAddressId(addyId);
+					address.setDonorId(donorId);
+					address.setLastUpdatedDate(valid8r.getEpoch()+"");
+					address.setLastUpdatedBy(user.getUsername());
+					retCode=dao.updateAddress(address, session);
+					if (retCode!=1)
+						url="error.jsp";
+					else {
+						donation.setDonationId(donationId);
+						donation.setDonor(donor);
+						donation.setAddress(address);
+						//donation.getAddress().setAddressId(addyId);
+						donation.setDonorId(donorId);
+						donation.setLastUpdatedDate(valid8r.getEpoch()+"");
+						donation.setUpdatedBy(user.getUsername());
+						retCode=dao.updateDonation(donation, session);						
+						this.setDonor(new Donor());
+						this.setAddress(new Address());
+						this.setDonation(new Donation());
+						if (retCode!=1)
+							url="error.jsp";
+						else {
+							req.setAttribute("MESSAGE", "Donation has been successfully updated.");
+							url="newticket.jsp";
+						}
+					}
+				}
+			}
+			else
+				url="newticket.jsp?update=Y";
 		}
 		else if ("Save Ticket".equals(action)) {
+			String update = req.getParameter("update");
+			if (update==null) update="";
 			pass1 = validateTicket(req);
 			donation.setCreationDate(valid8r.getEpoch()+"");
 			donation.setCreatedBy(user.getUsername());
 			donation.setStatus("Pending");
 			donation.setFarmBase(user.getFarmBase());
 			donation.setDonorId(this.getDonor().getDonorId());
+			address.setCreatedBy(user.getUsername());
+			 
 			if (pass1) {
-				int retCode=dao.insertDonation(donor, address, donation, session);
-				if (retCode!=1)
-					req.getRequestDispatcher("/error.jsp").forward(req, resp);
-				else
-					req.getRequestDispatcher("/newticket.jsp").forward(req, resp);
+				Long key=dao.insertDonation(donor, address, donation, session);
+				if (key<1)
+					url="error.jsp";
+				else {
+					req.setAttribute("MESSAGE", "Donation has been successfully saved. Confirmation Number is "+key);
+					this.setDonor(new Donor());
+					this.setAddress(new Address());
+					this.setDonation(new Donation());
+					url="call_log.jsp";
+				}
 			}
 			else
-				req.getRequestDispatcher("/newticket.jsp").forward(req, resp);
+				url="newticket.jsp";
 		}
 		
 		else if ("Users".equals(action)) {
 			int retCode=dao.searchSystemUsers(user.getFarmBase(), session);
 			if (retCode!=1)
-				req.getRequestDispatcher("/error.jsp").forward(req, resp);
+				url="error.jsp";
 			else {
-				req.getRequestDispatcher("/new_user.jsp").forward(req, resp);
+				url="new_user.jsp";
 			}
 		}
 		else if ("DeleteUser".equals(action)) {
 			String id = req.getParameter("userId");
 			boolean retCode=dao.deleteSystemUser(Integer.parseInt(id), session);
 			if (!retCode)
-				req.getRequestDispatcher("/error.jsp").forward(req, resp);
+				url="error.jsp";
 			else {
 				int rc=dao.searchSystemUsers(user.getFarmBase(), session);
 				if (rc!=1)
-					req.getRequestDispatcher("/error.jsp").forward(req, resp);
+					url="error.jsp";
 				else {
 					req.setAttribute("MESSAGE", "User successfully deleted.");
-					req.getRequestDispatcher("/new_user.jsp").forward(req, resp);
+					url="new_user.jsp";
 				}
 			}
 		}
@@ -192,7 +344,7 @@ public class DispatchServlet extends HttpServlet {
 			u.setUsername("");
 			this.setSystemUser(u);	
 			
-			req.getRequestDispatcher("create_user.jsp").forward(req, resp);
+			url="create_user.jsp";
 		}
 		else if ("SaveUser".equals(action)) {
 			boolean success=true;
@@ -217,7 +369,7 @@ public class DispatchServlet extends HttpServlet {
 			int retCode =0;
 			
 			if (!success) 
-				req.getRequestDispatcher("/create_user.jsp").forward(req, resp);
+				url="create_user.jsp";
 			else {
 				this.getSystemUser().setFarmBase(user.getFarmBase());
 				this.getSystemUser().setCreatedBy(user.getUsername());
@@ -227,17 +379,17 @@ public class DispatchServlet extends HttpServlet {
 				//insert new limit if limit doesn't exist
 				this.setSystemUser(new SystemUser());
 				if (id==0)
-					req.getRequestDispatcher("/error.jsp").forward(req, resp);
+					url="error.jsp";
 					else {
 						
 						req.setAttribute("MESSAGE", "New user successfully added.");
 						retCode=dao.searchSystemUsers(user.getFarmBase(), session);
 						if (retCode!=1)
-							req.getRequestDispatcher("/error.jsp").forward(req, resp);
+							url="error.jsp";
 						else {
-							req.getRequestDispatcher("/new_user.jsp").forward(req, resp);
+							url="new_user.jsp";
 						}
-						req.getRequestDispatcher("/new_user.jsp").forward(req, resp);
+						url="new_user.jsp";
 					}
 				}
 			
@@ -250,16 +402,23 @@ public class DispatchServlet extends HttpServlet {
 			if (pass1) {
 				int retCode=dao.insertCallLog(type, source, user.getUsername(), user.getFarmBase(), session);
 				if (retCode!=1)
-					req.getRequestDispatcher("/error.jsp").forward(req, resp);
+					url="error.jsp";
 				else
-					req.getRequestDispatcher("/newticket.jsp").forward(req, resp);
+					url="newticket.jsp";
 			} 
 			else
-				req.getRequestDispatcher("/call_log.jsp").forward(req, resp);
+				url="call_log.jsp";
 		}
-		else
-			req.getRequestDispatcher("/main.jsp").forward(req, resp);
 		
+		}//end null user else
+		
+		}
+		catch (Exception e) {
+			session.setAttribute("ERROR", e.getMessage());
+			req.getRequestDispatcher("/error.jsp").forward(req, resp);
+		}
+		
+		req.getRequestDispatcher("/"+url).forward(req, resp);
 	}
 
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -415,6 +574,12 @@ public class DispatchServlet extends HttpServlet {
 		if (fieldErr.length() > 0)
 			success = false;
 
+		fieldErr = valid8r.validateRequired("Status", this
+				.getDonation().getStatus());
+		req.setAttribute("field13Err", fieldErr);
+		if (fieldErr.length() > 0)
+			success = false;
+		
 		fieldErr = valid8r.validateRequired("Dispatch Date", this
 				.getDonation().getDispatchDate());
 		req.setAttribute("field13Err", fieldErr);
@@ -425,8 +590,16 @@ public class DispatchServlet extends HttpServlet {
 				.getDonation().getCallRequirements());
 		req.setAttribute("field12Err", fieldErr);
 		if (fieldErr.length() > 0)
-			success = false;	
+			success = false;
 		
+		if (this.getAddress().getGateFlag()!=null && "YES".equals(this.getAddress().getGateFlag())) {
+			fieldErr = valid8r.validateRequired("Gate Instructions", this
+					.getAddress().getGateInstructions());
+			req.setAttribute("field14Err", fieldErr);
+			if (fieldErr.length() > 0)
+				success = false;
+		} else 
+			this.getAddress().setGateFlag("NO");
 
 		return success;
 	}
@@ -480,6 +653,7 @@ public class DispatchServlet extends HttpServlet {
 				valid8r.cleanData(req.getParameter("gateInstructions")));
 		this.getDonation().setSpecialFlag(valid8r.cleanData(req.getParameter("specialFlag")));
 		this.getDonation().setCallRequirements(valid8r.cleanData(req.getParameter("callRequirements")));
+		this.getDonation().setStatus(valid8r.cleanData(req.getParameter("status")));
 		this.getDonation().setDispatchDate(valid8r.cleanData(req.getParameter("dispatchDate")));
 		this.getDonation().setMattressQtyType(valid8r.cleanData(req.getParameter("mattressQtySize")));
 		this.getDonation().setTelevisionSize(valid8r.cleanData(req.getParameter("televisionSize")));
@@ -568,5 +742,14 @@ public class DispatchServlet extends HttpServlet {
 	public static void setSystemUser(SystemUser systemUser) {
 		DispatchServlet.systemUser = systemUser;
 	}
+
+	public static ArrayList getDonations() {
+		return donations;
+	}
+
+	public static void setDonations(ArrayList donations) {
+		DispatchServlet.donations = donations;
+	}
+	
 
 }

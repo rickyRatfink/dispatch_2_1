@@ -6,25 +6,33 @@ public class Address implements Serializable {
 	
 	private Long addressId;
 	private Long donorId;
-	private String line1;
-	private String line2;
-	private String city;
-	private String state;
-	private String zipcode;
-	private String majorIntersection;
-	private String structureType;
-	private String subdivision;
-	private String streetSuffix;
-	private String unit;
-	private String building;
-	private String floor;
-	private String elevatorFlag;
-	private String gateFlag;
-	private String gateInstructions;
-	private String createdBy;
-	private String lastUpdatedBy;
+	private String line1="";
+	private String line2="";
+	private String city="";
+	private String state="";
+	private String zipcode="";
+	private String majorIntersection="";
+	private String structureType="";
+	private String subdivision="";
+	private String streetSuffix="";
+	private String unit="";
+	private String building="";
+	private String floor="";
+	private String elevatorFlag="";
+	private String gateFlag="";
+	private String gateInstructions="";
+	private String createdBy="";
+	private String lastUpdatedBy="";
+	private String lastUpdatedDate="";
 	
 	
+	
+	public String getLastUpdatedDate() {
+		return lastUpdatedDate;
+	}
+	public void setLastUpdatedDate(String lastUpdatedDate) {
+		this.lastUpdatedDate = lastUpdatedDate;
+	}
 	public Long getAddressId() {
 		return addressId;
 	}
