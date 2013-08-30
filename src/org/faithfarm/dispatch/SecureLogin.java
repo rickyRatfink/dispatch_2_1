@@ -44,8 +44,9 @@ public class SecureLogin extends HttpServlet {
 	      String password=req.getParameter("password");
 	      String next="";
 	      
+	      session.setAttribute("ERRORS", new ArrayList());
 	      boolean success=dao.secureLogin(username, password, session);
-	      
+	      System.out.println(success);
 	      if (success) {
 	    	  buildStateList(session);
 	    	  

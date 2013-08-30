@@ -57,7 +57,7 @@ function ucase(obj) {
                                 <td><input 
                                       name="username"
                                       size="15" maxlength="15" class="textbox1"
-                                      value="<%=DispatchServlet.getSystemUser().getUsername()%>" onkeyup="ucase(this)"
+                                      value="<%=DispatchServlet.getSystemUser().getUsername()%>" 
                                   />
                                 </td>
                              </tr>

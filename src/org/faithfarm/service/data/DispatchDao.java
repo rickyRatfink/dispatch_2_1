@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
@@ -23,41 +25,43 @@ import org.faithfarm.util.Validator;
 //import com.mysql.jdbc.PreparedStatement;
 
 public class DispatchDao {
- 
+
+	private final static Logger LOGGER = Logger.getLogger(DispatchDao.class.getName());
+	
 	private Validator valid8r = new Validator();
 	private String SERVER = "";
-	private String uid = ""; 
+	private String uid = "";
 	private String pwd = "";
 	private String database = "";
 
-	//private String this.getSERVER() = "ffarm_staging";
-	//private String pwd="j35u59538";
-	
-	
+	// private String this.getSERVER() = "ffarm_staging";
+	// private String pwd="j35u59538";
+
 	private Connection getConnection() throws SQLException,
 			ClassNotFoundException {
 
+		Properties prop = new Properties();
+		LOGGER.setLevel(Level.INFO);
 		
-	Properties prop = new Properties();
-	    
-    	try {
-               //load a properties file
-    		//prop.load(new FileInputStream("c:\\development\\workspace\\dispatch_2_1\\src\\properties\\config.properties"));
-    		prop.load(new FileInputStream("c:\\properties\\config.properties"));
-    		this.setUid(prop.getProperty("dbuser")); 
-    		this.setPwd(prop.getProperty("dbpassword"));
-    		this.setDatabase(prop.getProperty("database"));
-    		this.setSERVER(prop.getProperty("dburl")); 
-    	
-    	} catch (IOException ex) {
-    		System.out.println (ex.getMessage());
-    		ex.printStackTrace();
-        }
-		Class.forName("com.mysql.jdbc.Driver");
-        //System.out.println ("--jdbc:mysql://"+this.getSERVER()+"/" + database+","+ uid+","+ pwd);
-		Connection Conn = DriverManager.getConnection(
-				"jdbc:mysql://"+this.getSERVER()+"/" + database, uid, pwd);
+		try {
+			// load a properties file
+			// prop.load(new
+			// FileInputStream("c:\\development\\workspace\\dispatch_2_1\\src\\properties\\config.properties"));
+			prop.load(new FileInputStream("c:\\properties\\config.properties"));
+			this.setUid(prop.getProperty("dbuser"));
+			this.setPwd(prop.getProperty("dbpassword"));
+			this.setDatabase(prop.getProperty("database"));
+			this.setSERVER(prop.getProperty("dburl"));
 
+		} catch (IOException ex) {
+			System.out.println(ex.getMessage());
+			ex.printStackTrace();
+		}
+		Class.forName("com.mysql.jdbc.Driver");
+		// System.out.println ("--jdbc:mysql://"+this.getSERVER()+"/" +
+		// database+","+ uid+","+ pwd);
+		Connection Conn = DriverManager.getConnection(
+				"jdbc:mysql://" + this.getSERVER() + "/" + database, uid, pwd);
 
 		return Conn;
 	}
@@ -73,27 +77,26 @@ public class DispatchDao {
 
 			Connection Conn = this.getConnection();
 			Statement Stmt = Conn.createStatement();
-			StringBuffer s = new StringBuffer(
-					"SELECT DAILY_LIMIT FROM "+this.getDatabase()+".DAILY_LIMIT ");
+			StringBuffer s = new StringBuffer("SELECT DAILY_LIMIT FROM "
+					+ this.getDatabase() + ".DAILY_LIMIT ");
 			s.append("WHERE DISPATCH_DATE='" + sDate + "' ");
 			ResultSet RS = Stmt.executeQuery(s.toString());
-			
-			if (RS==null)
-				limit=0;
-			else
-				if (RS.next())
-					limit = RS.getInt(1);
-			
+
+			if (RS == null)
+				limit = 0;
+			else if (RS.next())
+				limit = RS.getInt(1);
+
 			RS.close();
 			Stmt.close();
 			Conn.close();
 		} catch (SQLException E) {
 			retCode = 0;
-			limit=0;
+			limit = 0;
 			session.setAttribute("SYSTEM_ERROR", E.getMessage());
 		} catch (ClassNotFoundException e) {
 			retCode = 0;
-			limit=0;
+			limit = 0;
 			session.setAttribute("SYSTEM_ERROR", e.getMessage());
 			e.printStackTrace();
 		}
@@ -112,26 +115,25 @@ public class DispatchDao {
 
 			Connection Conn = this.getConnection();
 			Statement Stmt = Conn.createStatement();
-			StringBuffer s = new StringBuffer(
-					"SELECT COUNT(DONATION_ID) FROM "+this.getDatabase()+".DONATION ");
+			StringBuffer s = new StringBuffer("SELECT COUNT(DONATION_ID) FROM "
+					+ this.getDatabase() + ".DONATION ");
 			s.append("WHERE DISPATCH_DATE='" + sDate + "' ");
 			ResultSet RS = Stmt.executeQuery(s.toString());
-			if (RS==null)
-				count=0;
-			else
-				if (RS.next())
-					count = RS.getInt(1);
-			
+			if (RS == null)
+				count = 0;
+			else if (RS.next())
+				count = RS.getInt(1);
+
 			RS.close();
 			Stmt.close();
 			Conn.close();
 		} catch (SQLException E) {
 			retCode = 0;
-			count=0;
+			count = 0;
 			session.setAttribute("SYSTEM_ERROR", E.getMessage());
 		} catch (ClassNotFoundException e) {
 			retCode = 0;
-			count=0;
+			count = 0;
 			session.setAttribute("SYSTEM_ERROR", e.getMessage());
 			e.printStackTrace();
 		}
@@ -139,7 +141,6 @@ public class DispatchDao {
 		return count;
 	}
 
-	
 	public Donor getDonor(Long id, HttpSession session) {
 		int retCode = 1;
 		ArrayList results = new ArrayList();
@@ -151,7 +152,8 @@ public class DispatchDao {
 
 			// Do something with the Connection
 			Statement Stmt = Conn.createStatement();
-			StringBuffer s = new StringBuffer("SELECT * FROM "+this.getDatabase()+".DONOR ");
+			StringBuffer s = new StringBuffer("SELECT * FROM "
+					+ this.getDatabase() + ".DONOR ");
 			s.append("WHERE DONOR_ID=" + id);
 
 			ResultSet RS = Stmt.executeQuery(s.toString());
@@ -183,11 +185,10 @@ public class DispatchDao {
 		return donor;
 	}
 
-	public int getDonors(String firstname,String lastname, HttpSession session) {
+	public int getDonors(String firstname, String lastname, HttpSession session) {
 		int retCode = 1;
 		ArrayList results1 = new ArrayList();
 		ArrayList results2 = new ArrayList();
-		
 
 		try {
 
@@ -195,14 +196,18 @@ public class DispatchDao {
 
 			// Do something with the Connection
 			Statement Stmt = Conn.createStatement();
-			StringBuffer s = new StringBuffer("SELECT * FROM "+this.getDatabase()+".DONOR INNER JOIN "+this.getDatabase()+".ADDRESS ON DONOR.DONOR_ID=ADDRESS.DONOR_ID ");
-			s.append("WHERE FIRSTNAME LIKE '%" + firstname + "%' and lastname like '%"+lastname+"%' ");
+			StringBuffer s = new StringBuffer("SELECT * FROM "
+					+ this.getDatabase() + ".DONOR INNER JOIN "
+					+ this.getDatabase()
+					+ ".ADDRESS ON DONOR.DONOR_ID=ADDRESS.DONOR_ID ");
+			s.append("WHERE FIRSTNAME LIKE '%" + firstname
+					+ "%' and lastname like '%" + lastname + "%' ");
 
 			ResultSet RS = Stmt.executeQuery(s.toString());
 			while (RS.next()) {
 				Donor donor = new Donor();
 				Address addy = new Address();
-				
+
 				donor.setDonorId(RS.getLong(1));
 				donor.setLastname(RS.getString(2));
 				donor.setFirstname(RS.getString(3));
@@ -213,7 +218,7 @@ public class DispatchDao {
 				donor.setLastUpdatedDate(RS.getString(8));
 				donor.setCreatedBy(RS.getString(9));
 				donor.setUdpatedBy(RS.getString(10));
-				
+
 				addy.setAddressId(RS.getLong(11));
 				addy.setDonorId(RS.getLong(12));
 				addy.setLine1(RS.getString(13));
@@ -234,7 +239,7 @@ public class DispatchDao {
 				addy.setCreatedBy(RS.getString(28));
 				addy.setLastUpdatedBy(RS.getString(29));
 				addy.setLastUpdatedDate(RS.getString(30));
-				
+
 				results1.add(donor);
 				results2.add(addy);
 			}
@@ -243,7 +248,7 @@ public class DispatchDao {
 			Conn.close();
 			session.setAttribute("RESULTS1_" + session.getId(), results1);
 			session.setAttribute("RESULTS2_" + session.getId(), results2);
-			
+
 		} catch (SQLException E) {
 			retCode = 0;
 			session.setAttribute("SYSTEM_ERROR", E.getMessage());
@@ -265,7 +270,7 @@ public class DispatchDao {
 			Statement Stmt = Conn.createStatement();
 
 			StringBuffer query = new StringBuffer();
-			query.append("UPDATE "+this.getDatabase()+".DONOR SET ");
+			query.append("UPDATE " + this.getDatabase() + ".DONOR SET ");
 			query.append(" LASTNAME='" + donor.getLastname() + "',");
 			query.append(" FIRSTNAME='" + donor.getFirstname() + "',");
 			query.append(" SUFFIX='" + donor.getSuffix() + "',");
@@ -296,7 +301,7 @@ public class DispatchDao {
 			Statement Stmt = Conn.createStatement();
 
 			StringBuffer query = new StringBuffer();
-			query.append("UPDATE "+this.getDatabase()+".ADDRESS SET ");
+			query.append("UPDATE " + this.getDatabase() + ".ADDRESS SET ");
 			query.append(" LINE1='" + addy.getLine1() + "',");
 			query.append(" LINE2='" + addy.getLine2() + "',");
 			query.append(" CITY='" + addy.getCity() + "',");
@@ -340,7 +345,7 @@ public class DispatchDao {
 
 			StringBuffer query = new StringBuffer();
 
-			query.append("UPDATE "+this.getDatabase()+".DONATION SET ");
+			query.append("UPDATE " + this.getDatabase() + ".DONATION SET ");
 			query.append(" DISPATCH_DATE='" + d.getDispatchDate() + "', ");
 			query.append(" STATUS='" + d.getStatus() + "', ");
 			query.append(" SPECIAL_FLAG='" + d.getSpecialFlag() + "', ");
@@ -412,11 +417,11 @@ public class DispatchDao {
 		try {
 
 			Connection Conn = this.getConnection();
-			String value="";
+			String value = "";
 			// Do something with the Connection
 			Statement Stmt = Conn.createStatement();
-			StringBuffer s = new StringBuffer(
-					"SELECT * FROM "+this.getDatabase()+".DONATION ");
+			StringBuffer s = new StringBuffer("SELECT * FROM "
+					+ this.getDatabase() + ".DONATION ");
 			s.append("WHERE DONATION_ID=" + id);
 
 			ResultSet RS = Stmt.executeQuery(s.toString());
@@ -428,251 +433,251 @@ public class DispatchDao {
 				d.setStatus(RS.getString(5));
 				d.setSpecialFlag(RS.getString(6));
 				d.setCallRequirements(RS.getString(7));
-				
-				if (RS.getString(8)==null)
-					value="";
-				else 
-					value=RS.getString(8);
+
+				if (RS.getString(8) == null)
+					value = "";
+				else
+					value = RS.getString(8);
 				d.setAc(value);
-				
-				if (RS.getString(9)==null)
-					value="";
-				else 
-					value=RS.getString(9);
+
+				if (RS.getString(9) == null)
+					value = "";
+				else
+					value = RS.getString(9);
 				d.setBedding(value);
-				
-				if (RS.getString(10)==null)
-					value="";
-				else 
-					value=RS.getString(10);
+
+				if (RS.getString(10) == null)
+					value = "";
+				else
+					value = RS.getString(10);
 				d.setBeddingQtyType(value);
-				
-				if (RS.getString(11)==null)
-					value="";
-				else 
-					value=RS.getString(11);
+
+				if (RS.getString(11) == null)
+					value = "";
+				else
+					value = RS.getString(11);
 				d.setBooks(value);
-				
-				if (RS.getString(12)==null)
-					value="";
-				else 
-					value=RS.getString(12);
+
+				if (RS.getString(12) == null)
+					value = "";
+				else
+					value = RS.getString(12);
 				d.setBooksQtyType(value);
-				
-				if (RS.getString(13)==null)
-					value="";
-				else 
-					value=RS.getString(13);
+
+				if (RS.getString(13) == null)
+					value = "";
+				else
+					value = RS.getString(13);
 				d.setClothing(value);
-				
-				if (RS.getString(14)==null)
-					value="";
-				else 
-					value=RS.getString(14);
+
+				if (RS.getString(14) == null)
+					value = "";
+				else
+					value = RS.getString(14);
 				d.setClothingQtyType(value);
-				
-				if (RS.getString(15)==null)
-					value="";
-				else 
-					value=RS.getString(15);
+
+				if (RS.getString(15) == null)
+					value = "";
+				else
+					value = RS.getString(15);
 				d.setComputer(value);
-				
-				if (RS.getString(16)==null)
-					value="";
-				else 
-					value=RS.getString(16);
+
+				if (RS.getString(16) == null)
+					value = "";
+				else
+					value = RS.getString(16);
 				d.setDesk(value);
-				
-				if (RS.getString(17)==null)
-					value="";
-				else 
-					value=RS.getString(17);
+
+				if (RS.getString(17) == null)
+					value = "";
+				else
+					value = RS.getString(17);
 				d.setChest(value);
-				
-				if (RS.getString(18)==null)
-					value="";
-				else 
-					value=RS.getString(18);
+
+				if (RS.getString(18) == null)
+					value = "";
+				else
+					value = RS.getString(18);
 				d.setArmoire(value);
-				
-				if (RS.getString(19)==null)
-					value="";
-				else 
-					value=RS.getString(19);
+
+				if (RS.getString(19) == null)
+					value = "";
+				else
+					value = RS.getString(19);
 				d.setDresser(value);
-				
-				if (RS.getString(20)==null)
-					value="";
-				else 
-					value=RS.getString(20);
+
+				if (RS.getString(20) == null)
+					value = "";
+				else
+					value = RS.getString(20);
 				d.setMirror(value);
-				
-				if (RS.getString(21)==null)
-					value="";
-				else 
-					value=RS.getString(21);
+
+				if (RS.getString(21) == null)
+					value = "";
+				else
+					value = RS.getString(21);
 				d.setNightstand(value);
-				
-				if (RS.getString(22)==null)
-					value="";
-				else 
-					value=RS.getString(22);
+
+				if (RS.getString(22) == null)
+					value = "";
+				else
+					value = RS.getString(22);
 				d.setHeadboard(value);
-				if (RS.getString(23)==null)
-					value="";
-				else 
-					value=RS.getString(23);
+				if (RS.getString(23) == null)
+					value = "";
+				else
+					value = RS.getString(23);
 				d.setFootboard(value);
-				if (RS.getString(24)==null)
-					value="";
-				else 
-					value=RS.getString(24);
+				if (RS.getString(24) == null)
+					value = "";
+				else
+					value = RS.getString(24);
 				d.setRails(value);
-				if (RS.getString(25)==null)
-					value="";
-				else 
-					value=RS.getString(25);
+				if (RS.getString(25) == null)
+					value = "";
+				else
+					value = RS.getString(25);
 				d.setLamp(value);
-				if (RS.getString(26)==null)
-					value="";
-				else 
-					value=RS.getString(26);
+				if (RS.getString(26) == null)
+					value = "";
+				else
+					value = RS.getString(26);
 				d.setLawnFurniture(value);
-				if (RS.getString(27)==null)
-					value="";
-				else 
-					value=RS.getString(27);
+				if (RS.getString(27) == null)
+					value = "";
+				else
+					value = RS.getString(27);
 				d.setMattress(value);
-				if (RS.getString(28)==null)
-					value="";
-				else 
-					value=RS.getString(28);
-				
+				if (RS.getString(28) == null)
+					value = "";
+				else
+					value = RS.getString(28);
+
 				d.setMattressQtyType(value);
-				if (RS.getString(29)==null)
-					value="";
-				else 
-					value=RS.getString(29);
+				if (RS.getString(29) == null)
+					value = "";
+				else
+					value = RS.getString(29);
 				d.setMiscHouseholdItems(value);
-				
-				if (RS.getString(30)==null)
-					value="";
-				else 
-					value=RS.getString(30);
+
+				if (RS.getString(30) == null)
+					value = "";
+				else
+					value = RS.getString(30);
 				d.setRefridgerator(value);
-				
-				if (RS.getString(31)==null)
-					value="";
-				else 
-					value=RS.getString(31);
+
+				if (RS.getString(31) == null)
+					value = "";
+				else
+					value = RS.getString(31);
 				d.setStove(value);
-				
-				if (RS.getString(32)==null)
-					value="";
-				else 
-					value=RS.getString(32);
+
+				if (RS.getString(32) == null)
+					value = "";
+				else
+					value = RS.getString(32);
 				d.setRecliner(value);
-				
-				if (RS.getString(33)==null)
-					value="";
-				else 
-					value=RS.getString(33);
+
+				if (RS.getString(33) == null)
+					value = "";
+				else
+					value = RS.getString(33);
 				d.setSofa(value);
-				
-				if (RS.getString(34)==null)
-					value="";
-				else 
-					value=RS.getString(34);
+
+				if (RS.getString(34) == null)
+					value = "";
+				else
+					value = RS.getString(34);
 				d.setLoveseat(value);
-				
-				if (RS.getString(35)==null)
-					value="";
-				else 
-					value=RS.getString(35);
+
+				if (RS.getString(35) == null)
+					value = "";
+				else
+					value = RS.getString(35);
 				d.setWallUnit(value);
-				
-				if (RS.getString(36)==null)
-					value="";
-				else 
-					value=RS.getString(36);
+
+				if (RS.getString(36) == null)
+					value = "";
+				else
+					value = RS.getString(36);
 				d.setTable(value);
-				
-				if (RS.getString(37)==null)
-					value="";
-				else 
-					value=RS.getString(37);
+
+				if (RS.getString(37) == null)
+					value = "";
+				else
+					value = RS.getString(37);
 				d.setChair(value);
-				
-				if (RS.getString(38)==null)
-					value="";
-				else 
-					value=RS.getString(38);
+
+				if (RS.getString(38) == null)
+					value = "";
+				else
+					value = RS.getString(38);
 				d.setTelevision(value);
-				
-				if (RS.getString(39)==null)
-					value="";
-				else 
-					value=RS.getString(39);
+
+				if (RS.getString(39) == null)
+					value = "";
+				else
+					value = RS.getString(39);
 				d.setTelevisionSize(value);
-				
-				if (RS.getString(40)==null)
-					value="";
-				else 
-					value=RS.getString(40);
+
+				if (RS.getString(40) == null)
+					value = "";
+				else
+					value = RS.getString(40);
 				d.setElectronics(value);
-				
-				if (RS.getString(41)==null)
-					value="";
-				else 
-					value=RS.getString(41);
+
+				if (RS.getString(41) == null)
+					value = "";
+				else
+					value = RS.getString(41);
 				d.setWasher(value);
-				
-				if (RS.getString(42)==null)
-					value="";
-				else 
-					value=RS.getString(42);
+
+				if (RS.getString(42) == null)
+					value = "";
+				else
+					value = RS.getString(42);
 				d.setDryer(value);
-				
-				if (RS.getString(43)==null)
-					value="";
-				else 
-					value=RS.getString(43);
+
+				if (RS.getString(43) == null)
+					value = "";
+				else
+					value = RS.getString(43);
 				d.setExerciseEquipment(value);
-				
-				if (RS.getString(44)==null)
-					value="";
-				else 
-					value=RS.getString(44);
+
+				if (RS.getString(44) == null)
+					value = "";
+				else
+					value = RS.getString(44);
 				d.setSpecialNotes(value);
-				
-				if (RS.getString(45)==null)
-					value="";
-				else 
-					value=RS.getString(45);
+
+				if (RS.getString(45) == null)
+					value = "";
+				else
+					value = RS.getString(45);
 				d.setCreationDate(value);
-				
-				if (RS.getString(46)==null)
-					value="";
-				else 
-					value=RS.getString(46);
+
+				if (RS.getString(46) == null)
+					value = "";
+				else
+					value = RS.getString(46);
 				d.setCreatedBy(value);
-				
-				if (RS.getString(47)==null)
-					value="";
-				else 
-					value=RS.getString(47);
+
+				if (RS.getString(47) == null)
+					value = "";
+				else
+					value = RS.getString(47);
 				d.setLastUpdatedDate(value);
-				
-				if (RS.getString(48)==null)
-					value="";
-				else 
-					value=RS.getString(48);
+
+				if (RS.getString(48) == null)
+					value = "";
+				else
+					value = RS.getString(48);
 				d.setUpdatedBy(value);
-				
-				if (RS.getString(49)==null)
-					value="";
-				else 
-					value=RS.getString(49);
+
+				if (RS.getString(49) == null)
+					value = "";
+				else
+					value = RS.getString(49);
 				d.setFarmBase(value);
 			}
 			RS.close();
@@ -701,10 +706,10 @@ public class DispatchDao {
 
 			// Do something with the Connection
 			Statement Stmt = Conn.createStatement();
-			StringBuffer s = new StringBuffer(
-					"SELECT * FROM "+this.getDatabase()+".ADDRESS ");
+			StringBuffer s = new StringBuffer("SELECT * FROM "
+					+ this.getDatabase() + ".ADDRESS ");
 			s.append("WHERE ADDRESS_ID=" + id);
-System.out.println(s);
+			System.out.println(s);
 			ResultSet RS = Stmt.executeQuery(s.toString());
 			while (RS.next()) {
 				addy.setAddressId(RS.getLong(1));
@@ -754,17 +759,18 @@ System.out.println(s);
 
 			// Do something with the Connection
 			Statement Stmt = Conn.createStatement();
-			StringBuffer s = new StringBuffer(
-					"SELECT * FROM "+this.getDatabase()+".DONATION ");
-			s.append("INNER JOIN "+this.getDatabase()+".DONOR ON DONOR.DONOR_ID=DONATION.DONOR_ID  ");
-			s.append("INNER JOIN "+this.getDatabase()+".ADDRESS ON DONOR.DONOR_ID=ADDRESS.DONOR_ID WHERE ");
+			StringBuffer s = new StringBuffer("SELECT * FROM "
+					+ this.getDatabase() + ".DONATION ");
+			s.append("INNER JOIN " + this.getDatabase()
+					+ ".DONOR ON DONOR.DONOR_ID=DONATION.DONOR_ID  ");
+			s.append("INNER JOIN " + this.getDatabase()
+					+ ".ADDRESS ON DONOR.DONOR_ID=ADDRESS.DONOR_ID WHERE ");
 			if (lastname.length() > 0)
 				s.append("DONOR.LASTNAME='" + lastname + "' AND ");
 			if (firstname.length() > 0)
 				s.append("DONOR.FIRSTNAME='" + firstname + "' AND ");
 			if (confirmation.length() > 0)
-				s.append("DONATION.DONATION_ID='" + confirmation
-						+ "' AND ");
+				s.append("DONATION.DONATION_ID='" + confirmation + "' AND ");
 			if (dispatchDate.length() > 0)
 				s.append("DONATION.DISPATCH_DATE='" + dispatchDate + "' AND ");
 			s.append("1=1");
@@ -887,7 +893,8 @@ System.out.println(s);
 
 			// Do something with the Connection
 			Statement Stmt = Conn.createStatement();
-			String query = "DELETE FROM "+this.getDatabase()+".SYSTEM_USER WHERE USER_ID=" + userId;
+			String query = "DELETE FROM " + this.getDatabase()
+					+ ".SYSTEM_USER WHERE USER_ID=" + userId;
 			retCode = Stmt.execute(query);
 			Stmt.close();
 			Conn.close();
@@ -909,13 +916,14 @@ System.out.println(s);
 		try {
 
 			Connection Conn = this.getConnection();
- 
+
 			// Do something with the Connection
 			Statement Stmt = Conn.createStatement();
 			StringBuffer s = new StringBuffer(
-					"SELECT USER_ID, USERNAME, USER_ROLE, LOGIN_COUNT, FARM_BASE FROM "+this.getDatabase()+".SYSTEM_USER ");
+					"SELECT USER_ID, USERNAME, USER_ROLE, LOGIN_COUNT, FARM_BASE FROM "
+							+ this.getDatabase() + ".SYSTEM_USER ");
 			s.append("WHERE FARM_BASE='" + farm + "'  ");
-			System.out.println (s.toString());
+			System.out.println(s.toString());
 			ResultSet RS = Stmt.executeQuery(s.toString());
 			while (RS.next()) {
 				SystemUser d = new SystemUser();
@@ -946,75 +954,90 @@ System.out.println(s);
 	public boolean secureLogin(String username, String password,
 			HttpSession session) {
 
+		boolean success = true;
+		ArrayList errors = new ArrayList();
+		
 		try {
 
-			Connection Conn = this.getConnection();
-
-			// Do something with the Connection
-			Statement Stmt = Conn.createStatement();
-
-			ResultSet RS = Stmt.executeQuery("SELECT * from "+this.getDatabase()+".SYSTEM_USER");
-
-			SystemUser user = new SystemUser();
-
-			while (RS.next()) {
-				String uid = RS.getString(2);
-				String pwd = RS.getString(3);
-
-				user.setUserId(Integer.valueOf(RS.getString(1)));
-				user.setUsername(RS.getString(2));
-				user.setPassword(RS.getString(3));
-				user.setCreationDate(RS.getString(4));
-				user.setLastUpdatedDate(RS.getString(5));
-				user.setUserRole(RS.getString(6));
-				user.setFarmBase(RS.getString(7));
-				user.setLoginCount(RS.getInt(8));
-
-				if (username.trim().length() == 0
-						|| username.equals("username")) {
-					session.setAttribute("ERROR_" + session.getId(),
-							"You must enter a username.");
-					return false;
-				}
-				if (password.trim().length() == 0
-						|| password.equals("password")) {
-					session.setAttribute("ERROR_" + session.getId(),
-							"You must enter a password.");
-					return false;
-				}
-
-				if (username.equals(uid)) {
-
-					if (password.equals(pwd)) {
-						session.setAttribute("USER_" + session.getId(), user);
-						this.updateLoginCount(user.getUserId(), session);
-
-						return true;
-					} else {
-						session.setAttribute("ERROR_" + session.getId(),
-								"The password entered is incorrect.");
-						return false;
-					}
-
-				}
+			if (username.trim().length() == 0 || username.equals("username")) {
+				errors.add("Username is required.");
+				success = false;
+				session.setAttribute("ERRORS", errors);
 			}
-
-			// Clean up after ourselves
-			RS.close();
-			Stmt.close();
-			Conn.close();
+			if (password.trim().length() == 0 || password.equals("password")) {
+				errors.add("Password is required.");
+				success = false;
+				
+			}
+		
+			if (!success) {
+				session.setAttribute("ERRORS", errors);
+				return false;
+			}
+			
+			
+			success=false;
+			
+				Connection Conn = this.getConnection();
+	
+				// Do something with the Connection
+				String query="SELECT * from SYSTEM_USER WHERE USERNAME='"
+						+ username
+						+ "' AND PASSWORD='"
+						+ password
+						+ "'";
+				Statement Stmt = Conn.createStatement();
+				ResultSet RS = Stmt
+						.executeQuery(query);
+				LOGGER.log(Level.INFO, query);
+				SystemUser user = new SystemUser();
+	
+				while (RS.next()) {
+					String uid = RS.getString(2);
+					String pwd = RS.getString(3);
+	
+					user.setUserId(Integer.valueOf(RS.getString(1)));
+					user.setUsername(RS.getString(2));
+					user.setPassword(RS.getString(3));
+					user.setCreationDate(RS.getString(4));
+					user.setLastUpdatedDate(RS.getString(5));
+					user.setUserRole(RS.getString(6));
+					user.setFarmBase(RS.getString(7));
+					user.setLoginCount(RS.getInt(8));
+	
+					if (username.equals(uid)) {
+	
+						if (password.equals(pwd)) {
+							session.setAttribute(
+									"USER_" + session.getId(), user);
+							this.updateLoginCount(user.getUserId(),
+									session);
+							success = true;
+						}
+	
+					}
+	
+				}
+				
+				// Clean up after ourselves
+				RS.close();
+				Stmt.close();
+				Conn.close();
+			
 		} catch (SQLException E) {
-			System.out.println(E.getMessage());
+			LOGGER.log(Level.SEVERE, E.getMessage());
 			session.setAttribute("SYSTEM_ERROR", E.getMessage());
 		} catch (ClassNotFoundException e) {
 			session.setAttribute("SYSTEM_ERROR", e.getMessage());
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, e.getMessage());
 		}
-
-		session.setAttribute("ERROR",
-				"The username or password entered is not valid.");
-
-		return false;
+		
+		if (!success) {
+			errors.add("The username or password entered is not valid.");
+		    session.setAttribute("ERRORS", errors);
+		} 
+		
+		return success;
 	}
 
 	public int updateLoginCount(Integer id, HttpSession session) {
@@ -1026,7 +1049,9 @@ System.out.println(s);
 			Statement Stmt = Conn.createStatement();
 
 			StringBuffer query = new StringBuffer();
-			query.append("UPDATE "+this.getDatabase()+".SYSTEM_USER SET LOGIN_COUNT=LOGIN_COUNT+1 WHERE USER_ID="
+			query.append("UPDATE "
+					+ this.getDatabase()
+					+ ".SYSTEM_USER SET LOGIN_COUNT=LOGIN_COUNT+1 WHERE USER_ID="
 					+ id + ";");
 			retCode = Stmt.executeUpdate(query.toString());
 
@@ -1052,8 +1077,9 @@ System.out.println(s);
 			Statement Stmt = Conn.createStatement();
 
 			StringBuffer query = new StringBuffer();
-			query.append("UPDATE "+this.getDatabase()+".SYSTEM_USER SET PASSWORD='"
-					+ password + "', QUESTION='" + question.replace("'", "''")
+			query.append("UPDATE " + this.getDatabase()
+					+ ".SYSTEM_USER SET PASSWORD='" + password
+					+ "', QUESTION='" + question.replace("'", "''")
 					+ "', ANSWER='" + answer + "' WHERE USER_ID=" + id + ";");
 			retCode = Stmt.executeUpdate(query.toString());
 
@@ -1075,7 +1101,7 @@ System.out.println(s);
 		int retCode = 0;
 		long confirmation = 0;
 		Long key = new Long("0");
-		
+
 		try {
 
 			if (donor.getDonorId() == null) {
@@ -1098,7 +1124,7 @@ System.out.println(s);
 			Statement Stmt = Conn.createStatement();
 
 			StringBuffer query = new StringBuffer();
-			query.append("INSERT INTO "+this.getDatabase()+".DONATION (");
+			query.append("INSERT INTO " + this.getDatabase() + ".DONATION (");
 			query.append(" DONOR_ID, DISPATCH_DATE, STATUS, SPECIAL_FLAG, CALL_REQUIREMENTS, AC, BEDDING, BEDDING_QTY_TYPE, BOOKS, BOOKS_QTY_TYPE, ");
 			query.append(" CLOTHING, CLOTHING_QTY_TYPE, COMPUTER, DESK, CHEST, ARMOIRE, DRESSER, MIRROR, NIGHTSTAND, HEADBOARD, FOOTBOARD, RAILS, ");
 			query.append(" LAMP, LAWN_FURNITURE, MATTRESS, MATTRESS_QTY_SIZE, MISC_HOUSEHOLD_ITEMS, REFRIDGERATOR, STOVE, RECLINER, SOFA, LOVESEAT, ");
@@ -1153,7 +1179,7 @@ System.out.println(s);
 			query.append("'" + valid8r.getEpoch() + "',");
 			query.append("'" + d.getCreatedBy() + "', ");
 			query.append("'" + d.getFarmBase() + "' );");
-			
+
 			Stmt = Conn.prepareStatement(query.toString(),
 					Stmt.RETURN_GENERATED_KEYS);
 			Stmt.executeUpdate(query.toString());
@@ -1161,7 +1187,7 @@ System.out.println(s);
 
 			if (generatedKeys.next())
 				key = generatedKeys.getLong(1);
-			
+
 			// Clean up after ourselves
 			Stmt.close();
 			Conn.close();
@@ -1185,7 +1211,7 @@ System.out.println(s);
 			// Do something with the Connection
 
 			StringBuffer query = new StringBuffer();
-			query.append("INSERT INTO "+this.getDatabase()+".DONOR (");
+			query.append("INSERT INTO " + this.getDatabase() + ".DONOR (");
 			query.append(" LASTNAME, FIRSTNAME, SUFFIX, CONTACT_PHONE, EMAIL_ADDRESS, CREATION_DATE, CREATED_BY ) VALUES (");
 			query.append("'" + d.getLastname() + "',");
 			query.append("'" + d.getFirstname() + "',");
@@ -1221,12 +1247,12 @@ System.out.println(s);
 		Long key = new Long("0");
 
 		try {
-			
+
 			Connection Conn = this.getConnection();
 			// Do something with the Connection
 
 			StringBuffer query = new StringBuffer();
-			query.append("INSERT INTO "+this.getDatabase()+".ADDRESS (");
+			query.append("INSERT INTO " + this.getDatabase() + ".ADDRESS (");
 			query.append(" DONOR_ID,LINE1, LINE2, CITY, STATE, ZIPCODE, MAJOR_INTERSECTION, SUBDIVISION, STREET_SUFFIX, STRUCTURE_TYPE, ");
 			query.append("UNIT, BUILDING, FLOOR, ELEVATOR_FLAG, GATED_FLAG, GATE_INSTRUCTIONS, CREATED_BY  ) VALUES (");
 			query.append(d.getDonorId() + ",");
@@ -1280,7 +1306,7 @@ System.out.println(s);
 			// Do something with the Connection
 
 			StringBuffer query = new StringBuffer();
-			query.append("INSERT INTO "+this.getDatabase()+".SYSTEM_USER (");
+			query.append("INSERT INTO " + this.getDatabase() + ".SYSTEM_USER (");
 			query.append(" USERNAME, PASSWORD, CREATION_DATE, CREATED_BY, USER_ROLE, FARM_BASE ) VALUES (");
 			query.append("'" + d.getUsername() + "',");
 			query.append("'" + d.getPassword() + "',");
@@ -1324,7 +1350,7 @@ System.out.println(s);
 			Statement Stmt = Conn.createStatement();
 
 			StringBuffer query = new StringBuffer();
-			query.append("INSERT INTO "+this.getDatabase()+".CALL_LOG (");
+			query.append("INSERT INTO " + this.getDatabase() + ".CALL_LOG (");
 			query.append(" CALL_TYPE, SOURCE, CALL_DATE, CALL_AGENT, FARM_BASE) VALUES (");
 
 			query.append("'" + type + "',");
@@ -1362,7 +1388,7 @@ System.out.println(s);
 			Statement Stmt = Conn.createStatement();
 
 			StringBuffer query = new StringBuffer();
-			query.append("INSERT INTO "+this.getDatabase()+".DAILY_LIMIT (");
+			query.append("INSERT INTO " + this.getDatabase() + ".DAILY_LIMIT (");
 			query.append(" DISPATCH_DATE, DAILY_LIMIT, FARM_BASE, UPDATED_BY, UPDATED_DATE) VALUES (");
 			query.append("'" + dispatchDate + "',");
 			query.append(limit + ",");
@@ -1398,7 +1424,7 @@ System.out.println(s);
 			Statement Stmt = Conn.createStatement();
 
 			StringBuffer query = new StringBuffer();
-			query.append("UPDATE "+this.getDatabase()+".DAILY_LIMIT ");
+			query.append("UPDATE " + this.getDatabase() + ".DAILY_LIMIT ");
 			query.append(" SET DAILY_LIMIT=" + limit + ", UPDATED_BY='" + user
 					+ "', UPDATED_DATE='" + valid8r.getEpoch() + "' ");
 			query.append(" WHERE DISPATCH_DATE='" + dispatchDate
@@ -1418,8 +1444,6 @@ System.out.println(s);
 		return retCode;
 
 	}
-
-	
 
 	public String getSERVER() {
 		return SERVER;
@@ -1460,7 +1484,5 @@ System.out.println(s);
 	public void setValid8r(Validator valid8r) {
 		this.valid8r = valid8r;
 	}
-	
-	
 
 }

@@ -1,5 +1,7 @@
+<%@ page import="java.util.ArrayList" %>
+
 <%
-String error = (String)session.getAttribute("ERROR");
+ArrayList errors = (ArrayList)session.getAttribute("ERRORS");
 %> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -25,7 +27,9 @@ String error = (String)session.getAttribute("ERROR");
                          <tr>
                             <td width="160"></td>
                             <td height="23" class="loginError">
-                            <%=error%>
+                            <% for (int i=0;i<errors.size();i++) { %>
+                            	<%=errors.get(i)%></br>
+                            <% } %>
                             </td>
                          </tr>
                         <tr>

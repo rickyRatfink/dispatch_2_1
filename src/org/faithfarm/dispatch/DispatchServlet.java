@@ -373,7 +373,7 @@ public class DispatchServlet extends HttpServlet {
 			else {
 				this.getSystemUser().setFarmBase(user.getFarmBase());
 				this.getSystemUser().setCreatedBy(user.getUsername());
-				this.getSystemUser().setPassword(user.getUsername());
+				this.getSystemUser().setPassword("changeme");
 				
 				long id = dao.insertSystemUser(this.getSystemUser(), session);
 				//insert new limit if limit doesn't exist
