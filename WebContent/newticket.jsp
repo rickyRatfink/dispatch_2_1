@@ -1,10 +1,17 @@
 <%@ page import="org.faithfarm.dispatch.DispatchServlet" %>
+<%@ page import="org.faithfarm.domain.Donation" %>
 <%@ page import="java.util.ArrayList" %>
 
  
 <%
 String update = request.getParameter("update");
 if (update==null) update="";
+
+Donation d = (Donation)session.getAttribute("temp_donation");
+if (d!=null) {
+	DispatchServlet.setDonation(d);
+	update="Y";
+}
 %>
 
 <script type="text/javascript"> 
@@ -202,6 +209,14 @@ $(document).ready(function() {
 	String f12Err = (String)request.getAttribute("field12Err");
 	String f13Err = (String)request.getAttribute("field13Err");
 	String f14Err = (String)request.getAttribute("field14Err");
+	String f15Err = (String)request.getAttribute("field15Err");
+	String f16Err = (String)request.getAttribute("field16Err");
+	String f17Err = (String)request.getAttribute("field17Err");
+	String f18Err = (String)request.getAttribute("field18Err");
+	String f19Err = (String)request.getAttribute("field19Err");
+	String f20Err = (String)request.getAttribute("field20Err");
+	String f21Err = (String)request.getAttribute("field21Err");
+	
 	if (f1Err==null) f1Err="";	
 	if (f2Err==null) f2Err="";	
 	if (f3Err==null) f3Err="";	
@@ -216,6 +231,14 @@ $(document).ready(function() {
 	if (f12Err==null) f12Err="";	
 	if (f13Err==null) f13Err="";
 	if (f14Err==null) f14Err="";	
+	if (f15Err==null) f15Err="";	
+	if (f16Err==null) f16Err="";	
+	if (f17Err==null) f17Err="";	
+	if (f18Err==null) f18Err="";	
+	if (f19Err==null) f19Err="";	
+	if (f20Err==null) f20Err="";	
+	if (f21Err==null) f21Err="";	
+	
 	
 	String message=(String)request.getAttribute("MESSAGE");	
 	if (message==null) message="";
@@ -230,7 +253,9 @@ function ucase(obj) {
 <form method="POST" action="<%=request.getContextPath()%>/ticket"> 
 			<tr>
 				<td width="100%" align="center" valign="center" border="0" bgcolor="#FFFFFF">
-                        <h1>Donor Information<% if ("Y".equals(update)) { %>&nbsp;<i>(Confirmation #<%=DispatchServlet.getDonation().getDonationId() %>)</i><%}%></h1>
+                        <h1>Donor Information<% if ("Y".equals(update)) { %>&nbsp;<i>(Confirmation #<%=DispatchServlet.getDonation().getDonationId() %>)</i>
+                        <a href="<%=request.getContextPath()%>/print_ticket.jsp"><img src="images/printer.png" height="20" width="20" title="Print Donation Ticket" alt="Print Dispatches"/></a>
+                        <%}%></h1>
                         <% if (message.length()>0) { %>
                         <h5><img src="images/success.png"/><%=message %></h5>
                         <% } %>
@@ -362,7 +387,7 @@ function ucase(obj) {
                         <table width="95%" cellpadding="0" cellspacing="0" border="0">
                         	<tr>
                             	<td class="fieldHeading" >Contact Phone<%=required%></td>
-                                <td class="fieldHeading" >Email Address<%=required%></td>
+                                <td class="fieldHeading" >Email Address</td>
                                 <td width="40%"></td>
                             </tr>
                            
@@ -393,17 +418,17 @@ function ucase(obj) {
                         <table width="95%" cellpadding="0" cellspacing="0" border="0">
                         	<tr>
                             	<td class="fieldHeading" >Major Intersection<%=required%></td>
-                                <td class="fieldHeading" >Subdivision</td>
+                                <td class="fieldHeading" >Subdivision<%=required%></td>
                                 <td width="55%"></td>
                              </tr>
                              <tr>
                             	<td><input type="text" size="30" maxlength="30" name="majorIntersection" value="<%=DispatchServlet.getAddress().getMajorIntersection() %>" <% if (f7Err.length()>0){%> class="textboxErr"<% } else { %> class="textbox"<%}%> onkeyup="ucase(this)" /></td>
-                                <td><input type="text" size="30" maxlength="30" name="subdivision" value="<%=DispatchServlet.getAddress().getSubdivision() %>" class="textbox" " class="textbox" onkeyup="ucase(this)" /></td>
+                                <td><input type="text" size="30" maxlength="30" name="subdivision" value="<%=DispatchServlet.getAddress().getSubdivision() %>"<% if (f11Err.length()>0){%> class="textboxErr"<% } else { %> class="textbox"<%}%> onkeyup="ucase(this)" /></td>
                                 <td></td>
                              </tr>
                              <tr>
                              	<td class="fieldError"><%=f7Err%></td>
-                                <td></td>
+                                <td class="fieldError"><%=f11Err%></td>
                                 <td></td>
                              </tr>
                          </table>
@@ -482,7 +507,7 @@ function ucase(obj) {
                                 	<%
                                      ddl = (ArrayList)session.getAttribute("dllFloor");
                                     %>
-                                  <select name="floor" <% if (f9Err.length()>0){%> class="ddlErr"<% } else { %> class="ddl"<%}%>>
+                                  <select name="floor" class="ddl">
                                     <option value="">
                                     </option>
                                     <%
@@ -620,6 +645,42 @@ function ucase(obj) {
                             <tr>
                              	<td class="fieldError"><%=f13Err%></td>
                             </tr>
+                            
+                            <tr>
+                            	<td width="120" class="fieldHeading" >Item(s) Location</td>
+                            </tr>
+                            <tr> 
+                            	<td>
+                            	 <%
+                                     ddl = (ArrayList)session.getAttribute("dllLocation");
+                                  %>
+                                    <select name="location" class="ddl">
+                                    <option value="">
+                                    </option>
+                                    <%
+                                    if (ddl!=null) {
+                                      for (int j=0;j<ddl.size();j++) {
+                                        %>
+                                        <option 
+                                            value="<%=ddl.get(j)%>"
+                                            <%
+                                            if
+                                            (ddl.get(j).equals(DispatchServlet.getDonation().getLocation()))
+                                            {%>selected<%}%>>
+
+
+                                          <%=ddl.get(j)%>
+                                        </option>
+                                        <%
+                                      }
+                                      %>
+                                      <%
+                                    }
+                                    %>
+                                  </select>
+                                  </td>
+                            </tr>
+                           
                             </table>
                             
                             <table width="95%" cellpadding="0" cellspacing="0" border="0">
@@ -676,8 +737,8 @@ function ucase(obj) {
                                  	<%
                                      ddl = (ArrayList)session.getAttribute("dllQtyType");
 									  %>
-									  <select name="beddingQtyType" class="ddl">
-										<option value="">
+									  <select name="beddingQtyType" <% if (f20Err.length()>0) { %>class="ddlErr"<% } else { %> class="ddl" <%}%>>
+										<option value="">Packing Type
 										</option>
 										<%
 										if (ddl!=null) {
@@ -707,8 +768,8 @@ function ucase(obj) {
                                 	<%
                                      ddl = (ArrayList)session.getAttribute("dllQtyType");
 									  %>
-									  <select name="booksQtyType" class="ddl">
-										<option value=""></option>
+									  <select name="booksQtyType" <% if (f19Err.length()>0) { %>class="ddlErr"<% } else { %> class="ddl" <%}%>>
+										<option value="">Packing Type</option>
 										</option>
 										<%
 										if (ddl!=null) {
@@ -742,8 +803,8 @@ function ucase(obj) {
                                     <%
                                      ddl = (ArrayList)session.getAttribute("dllQtyType");
 									  %>
-									  <select name="clothingQtyType" class="ddl">
-										<option value=""></option>
+									  <select name="clothingQtyType" <% if (f18Err.length()>0) { %>class="ddlErr"<% } else { %> class="ddl" <%}%>>
+										<option value="">Packing Type</option>
 										<%
 										if (ddl!=null) {
 										  for (int j=0;j<ddl.size();j++) {
@@ -812,8 +873,8 @@ function ucase(obj) {
                                      <%
                                      ddl = (ArrayList)session.getAttribute("dllMattress");
 									  %>
-									  <select name="mattressQtySize" class="ddl">
-										<option value=""></option>
+									  <select name="mattressQtySize" <% if (f21Err.length()>0) { %>class="ddlErr"<% } else { %> class="ddl" <%}%>>
+										<option value="">Size</option>
 										<%
 										if (ddl!=null) {
 										  for (int j=0;j<ddl.size();j++) {
@@ -840,7 +901,7 @@ function ucase(obj) {
                               </tr>
                               <tr><td colspan="6" height="1"></td></tr>
                               <tr>
-                            	<td class="itemName">Refridgerator</td>
+                            	<td class="itemName">Refrigerator</td>
                                 <td class="itemQuantity"><input type="text" name="refridgerator" value="<%=DispatchServlet.getDonation().getRefridgerator() %>" size="2" maxlength="2" class="textbox" /></td>
                                 <td class="itemName">Stove</td>
                                 <td class="itemQuantity"><input type="text" name="stove" value="<%=DispatchServlet.getDonation().getStove() %>" size="2" maxlength="2" class="textbox" /></td>
@@ -861,16 +922,75 @@ function ucase(obj) {
                               <tr><td colspan="6" height="1"></td></tr>
                                <tr>
                             	<td class="itemName">Table</td>
-                                <td class="itemQuantity"><input type="text" name="table" value="<%=DispatchServlet.getDonation().getTable() %>" size="2" maxlength="2" class="textbox" /></td>
+                                <td class="itemQuantity"><input type="text" name="table" value="<%=DispatchServlet.getDonation().getTable() %>" size="2" maxlength="2" class="textbox" />
+                                &nbsp;&nbsp;
+                                 <%
+                                     ddl = (ArrayList)session.getAttribute("dllTableType");
+                                  %>
+                                  <select name="tableType" <% if (f16Err.length()>0){%> class="ddlErr"<% } else { %> class="ddl"<%}%>>
+                                    <option value="">Type
+                                    </option>
+                                    <%
+                                    if (ddl!=null) {
+                                      for (int j=0;j<ddl.size();j++) {
+                                        %>
+                                        <option 
+                                            value="<%=ddl.get(j)%>"
+                                            <%
+                                            if
+                                            (ddl.get(j).equals(DispatchServlet.getDonation().getTableType()))
+                                            {%>selected<%}%>>
+
+
+                                          <%=ddl.get(j)%>
+                                        </option>
+                                        <%
+                                      }
+                                      %>
+                                      <%
+                                    }
+                                    %>
+                                  </select>
+                                
+                                </td>
                                 <td class="itemName">Chair</td>
-                                <td class="itemQuantity"><input type="text" name="chair" value="<%=DispatchServlet.getDonation().getChair() %>" size="2" maxlength="2" class="textbox" /></td>
+                                <td class="itemQuantity"><input type="text" name="chair" value="<%=DispatchServlet.getDonation().getChair() %>" size="2" maxlength="2" class="textbox" />
+                                &nbsp;&nbsp;
+                                 <%
+                                     ddl = (ArrayList)session.getAttribute("dllChairType");
+                                  %>
+                                  <select name="chairType" <% if (f17Err.length()>0){%> class="ddlErr"<% } else { %> class="ddl"<%}%>>
+                                    <option value="">Type
+                                    </option>
+                                    <%
+                                    if (ddl!=null) {
+                                      for (int j=0;j<ddl.size();j++) {
+                                        %>
+                                        <option 
+                                            value="<%=ddl.get(j)%>"
+                                            <% 
+                                            if
+                                            (ddl.get(j).equals(DispatchServlet.getDonation().getChairType()))
+                                            {%>selected<%}%>>
+
+
+                                          <%=ddl.get(j)%>
+                                        </option>
+                                        <%
+                                      }
+                                      %>
+                                      <%
+                                    }
+                                    %>
+                                  </select>
+                                </td>
                           		<td class="itemName">Television</td>
                                 <td class="itemQuantity"><input type="text" name="television" value="<%=DispatchServlet.getDonation().getTelevision() %>" size="2" maxlength="2" class="textbox" onClick="javascript:alert('Please notify the donor that Faith Farm does not accept televisions that are more than 10 years old.  (The year can be located on the serial tag on the back of the televion.)');"/>
                                 <%
                                      ddl = (ArrayList)session.getAttribute("dllTvSize");
 									  %>
-									  <select name="televisionSize" class="ddl">
-										<option value=""></option>
+									  <select name="televisionSize" <% if (f15Err.length()>0) { %>class="ddlErr"<% } else { %> class="ddl"<%}%>>
+										<option value="">Size</option>
 										<%
 										if (ddl!=null) {
 										  for (int j=0;j<ddl.size();j++) {
@@ -906,7 +1026,11 @@ function ucase(obj) {
                               <tr><td colspan="6" height="1"></td></tr>
                                <tr>
                             	<td class="itemName">Exercise Equipment</td>
-                                <td colspan="6" class="itemQuantity"><input type="text" name="exerciseEquipment" value="<%=DispatchServlet.getDonation().getExerciseEquipment() %>" size="2" maxlength="2" class="textbox" /></td>
+                                <td class="itemQuantity"><input type="text" name="exerciseEquipment" value="<%=DispatchServlet.getDonation().getExerciseEquipment() %>" size="2" maxlength="2" class="textbox" /></td>
+                                <td class="itemName">Bookcase</td>
+                                <td class="itemQuantity"><input type="text" name="bookcase" value="<%=DispatchServlet.getDonation().getBookcase() %>" size="2" maxlength="2" class="textbox" /></td>
+                                <td class="itemName">Ottoman</td>
+                                <td class="itemQuantity"><input type="text" name="ottoman" value="<%=DispatchServlet.getDonation().getOttoman() %>" size="2" maxlength="2" class="textbox" /></td>
                                </tr>
                                <tr><td colspan="6" height="1"></td></tr>
                                <tr>

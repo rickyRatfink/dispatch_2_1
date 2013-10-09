@@ -72,14 +72,15 @@ public class DispatchDao {
 		int retCode = 1;
 		ArrayList results = new ArrayList();
 		Donor donor = new Donor();
-
+		SystemUser user = (SystemUser)session.getAttribute("USER_"+session.getId());
+		
 		try {
 
 			Connection Conn = this.getConnection();
 			Statement Stmt = Conn.createStatement();
 			StringBuffer s = new StringBuffer("SELECT DAILY_LIMIT FROM "
 					+ this.getDatabase() + ".DAILY_LIMIT ");
-			s.append("WHERE DISPATCH_DATE='" + sDate + "' ");
+			s.append("WHERE DISPATCH_DATE='" + sDate + "' AND farm_base='"+user.getFarmBase()+"' ");
 			ResultSet RS = Stmt.executeQuery(s.toString());
 
 			if (RS == null)
@@ -110,14 +111,15 @@ public class DispatchDao {
 		int retCode = 1;
 		ArrayList results = new ArrayList();
 		Donor donor = new Donor();
-
+		SystemUser user = (SystemUser)session.getAttribute("USER_"+session.getId());
+		
 		try {
 
 			Connection Conn = this.getConnection();
 			Statement Stmt = Conn.createStatement();
 			StringBuffer s = new StringBuffer("SELECT COUNT(DONATION_ID) FROM "
 					+ this.getDatabase() + ".DONATION ");
-			s.append("WHERE DISPATCH_DATE='" + sDate + "' ");
+			s.append("WHERE DISPATCH_DATE='" + sDate + "' and farm_base='"+user.getFarmBase()+"' ");
 			ResultSet RS = Stmt.executeQuery(s.toString());
 			if (RS == null)
 				count = 0;
@@ -347,6 +349,7 @@ public class DispatchDao {
 
 			query.append("UPDATE " + this.getDatabase() + ".DONATION SET ");
 			query.append(" DISPATCH_DATE='" + d.getDispatchDate() + "', ");
+			query.append(" LOCATION='" + d.getLocation() + "', ");
 			query.append(" STATUS='" + d.getStatus() + "', ");
 			query.append(" SPECIAL_FLAG='" + d.getSpecialFlag() + "', ");
 			query.append(" CALL_REQUIREMENTS='" + d.getCallRequirements()
@@ -384,12 +387,18 @@ public class DispatchDao {
 			query.append(" WALL_UNIT='" + d.getWallUnit() + "', ");
 			query.append(" TABLES='" + d.getTable() + "', ");
 			query.append(" CHAIR='" + d.getChair() + "', ");
+			query.append(" TABLE_TYPE='" + d.getTableType() + "', ");
+			query.append(" CHAIR_TYPE='" + d.getChairType() + "', ");
 			query.append(" TELEVISION='" + d.getTelevision() + "', ");
 			query.append(" TELEVISION_SIZE='" + d.getTelevisionSize() + "', ");
 			query.append(" ELECTRONICS='" + d.getElectronics() + "', ");
 			query.append(" WASHER='" + d.getWasher() + "', ");
 			query.append(" DRYER='" + d.getDryer() + "', ");
 			query.append(" EXERCISE_EQUIPMENT='" + d.getExerciseEquipment()
+					+ "', ");
+			query.append(" BOOKCASE='" + d.getBookcase()
+					+ "', ");
+			query.append(" OTTOMAN='" + d.getOttoman()
 					+ "', ");
 			query.append(" SPECIAL_NOTES='" + d.getSpecialNotes() + "', ");
 			query.append(" LAST_UPDATED_DATE='" + d.getLastUpdatedDate()
@@ -398,6 +407,9 @@ public class DispatchDao {
 					+ "' WHERE DONATION_ID=" + d.getDonationId());
 
 			retCode = Stmt.executeUpdate(query.toString());
+			
+
+			
 			Stmt.close();
 			Conn.close();
 		} catch (SQLException E) {
@@ -679,6 +691,36 @@ public class DispatchDao {
 				else
 					value = RS.getString(49);
 				d.setFarmBase(value);
+				
+				if (RS.getString(50) == null)
+					value = "";
+				else
+					value = RS.getString(50);
+				d.setTableType(value);
+				
+				if (RS.getString(51) == null)
+					value = "";
+				else
+					value = RS.getString(51);
+				d.setChairType(value);
+				
+				if (RS.getString(52) == null)
+					value = "";
+				else
+					value = RS.getString(52);
+				d.setLocation(value);
+				
+				if (RS.getString(53) == null)
+					value = "";
+				else
+					value = RS.getString(53);
+				d.setBookcase(value);
+				
+				if (RS.getString(54) == null)
+					value = "";
+				else
+					value = RS.getString(54);
+				d.setOttoman(value);
 			}
 			RS.close();
 			Stmt.close();
@@ -709,7 +751,6 @@ public class DispatchDao {
 			StringBuffer s = new StringBuffer("SELECT * FROM "
 					+ this.getDatabase() + ".ADDRESS ");
 			s.append("WHERE ADDRESS_ID=" + id);
-			System.out.println(s);
 			ResultSet RS = Stmt.executeQuery(s.toString());
 			while (RS.next()) {
 				addy.setAddressId(RS.getLong(1));
@@ -749,10 +790,10 @@ public class DispatchDao {
 	}
 
 	public int searchTickets(String lastname, String firstname,
-			String confirmation, String dispatchDate, HttpSession session) {
+			String confirmation, String dispatchDate, String status, String special, HttpSession session) {
 		int retCode = 1;
 		ArrayList results = new ArrayList();
-
+		SystemUser user = (SystemUser)session.getAttribute("USER_"+session.getId());
 		try {
 
 			Connection Conn = this.getConnection();
@@ -764,17 +805,23 @@ public class DispatchDao {
 			s.append("INNER JOIN " + this.getDatabase()
 					+ ".DONOR ON DONOR.DONOR_ID=DONATION.DONOR_ID  ");
 			s.append("INNER JOIN " + this.getDatabase()
-					+ ".ADDRESS ON DONOR.DONOR_ID=ADDRESS.DONOR_ID WHERE ");
+					+ ".ADDRESS ON DONOR.DONOR_ID=ADDRESS.DONOR_ID WHERE 1=1 ");
 			if (lastname.length() > 0)
-				s.append("DONOR.LASTNAME='" + lastname + "' AND ");
+				s.append("AND DONOR.LASTNAME='" + lastname + "'  ");
 			if (firstname.length() > 0)
-				s.append("DONOR.FIRSTNAME='" + firstname + "' AND ");
+				s.append("AND DONOR.FIRSTNAME='" + firstname + "'  ");
 			if (confirmation.length() > 0)
-				s.append("DONATION.DONATION_ID='" + confirmation + "' AND ");
+				s.append("AND DONATION.DONATION_ID='" + confirmation + "'  ");
 			if (dispatchDate.length() > 0)
-				s.append("DONATION.DISPATCH_DATE='" + dispatchDate + "' AND ");
-			s.append("1=1");
-
+				s.append("AND DONATION.DISPATCH_DATE='" + dispatchDate + "'  ");
+			if (status.length() > 0)
+				s.append("AND DONATION.STATUS='" + status + "'  ");
+			if (special.length() > 0)
+				s.append("AND DONATION.SPECIAL_FLAG='" + special + "'  ");
+			s.append("AND DONATION.FARM_BASE='"+user.getFarmBase().toUpperCase()+"'  ");
+			
+			System.out.println (s);
+			
 			ResultSet RS = Stmt.executeQuery(s.toString());
 			while (RS.next()) {
 				Donation d = new Donation();
@@ -827,39 +874,44 @@ public class DispatchDao {
 				d.setLastUpdatedDate(RS.getString(47));
 				d.setUpdatedBy(RS.getString(48));
 				d.setFarmBase(RS.getString(49));
-
+				d.setChairType(RS.getString(51));
+				d.setTableType(RS.getString(50));
+				d.setLocation(RS.getString(52));
+				d.setBookcase(RS.getString(53));
+				d.setOttoman(RS.getString(54));
+				
 				Donor donor = new Donor();
-				donor.setDonorId(RS.getLong(50));
-				donor.setLastname(RS.getString(51));
-				donor.setFirstname(RS.getString(52));
-				donor.setSuffix(RS.getString(53));
-				donor.setContactPhone(RS.getString(54));
-				donor.setEmailAddress(RS.getString(55));
-				donor.setCreationDate(RS.getString(56));
-				donor.setLastUpdatedDate(RS.getString(57));
-				donor.setCreatedBy(RS.getString(58));
-				donor.setUdpatedBy(RS.getString(59));
+				donor.setDonorId(RS.getLong(55));
+				donor.setLastname(RS.getString(56));
+				donor.setFirstname(RS.getString(57));
+				donor.setSuffix(RS.getString(58));
+				donor.setContactPhone(RS.getString(59));
+				donor.setEmailAddress(RS.getString(60));
+				donor.setCreationDate(RS.getString(61));
+				donor.setLastUpdatedDate(RS.getString(62));
+				donor.setCreatedBy(RS.getString(63));
+				donor.setUdpatedBy(RS.getString(64));
 
 				Address addy = new Address();
-				addy.setAddressId(RS.getLong(60));
-				addy.setDonorId(RS.getLong(61));
-				addy.setLine1(RS.getString(62));
-				addy.setLine2(RS.getString(63));
-				addy.setCity(RS.getString(64));
-				addy.setState(RS.getString(65));
-				addy.setZipcode(RS.getString(66));
-				addy.setMajorIntersection(RS.getString(67));
-				addy.setSubdivision(RS.getString(68));
-				addy.setStreetSuffix(RS.getString(69));
-				addy.setStructureType(RS.getString(70));
-				addy.setUnit(RS.getString(71));
-				addy.setBuilding(RS.getString(72));
-				addy.setFloor(RS.getString(73));
-				addy.setElevatorFlag(RS.getString(74));
-				addy.setGateFlag(RS.getString(75));
-				addy.setGateInstructions(RS.getString(76));
-				addy.setCreatedBy(RS.getString(77));
-				addy.setLastUpdatedBy(RS.getString(78));
+				addy.setAddressId(RS.getLong(65));
+				addy.setDonorId(RS.getLong(66));
+				addy.setLine1(RS.getString(67));
+				addy.setLine2(RS.getString(68));
+				addy.setCity(RS.getString(69));
+				addy.setState(RS.getString(70));
+				addy.setZipcode(RS.getString(71));
+				addy.setMajorIntersection(RS.getString(72));
+				addy.setSubdivision(RS.getString(73));
+				addy.setStreetSuffix(RS.getString(74));
+				addy.setStructureType(RS.getString(75));
+				addy.setUnit(RS.getString(76));
+				addy.setBuilding(RS.getString(77));
+				addy.setFloor(RS.getString(78));
+				addy.setElevatorFlag(RS.getString(79));
+				addy.setGateFlag(RS.getString(80));
+				addy.setGateInstructions(RS.getString(81));
+				addy.setCreatedBy(RS.getString(82));
+				addy.setLastUpdatedBy(RS.getString(83));
 
 				d.setDonor(donor);
 				d.setAddress(addy);
@@ -1004,15 +1056,23 @@ public class DispatchDao {
 					user.setUserRole(RS.getString(6));
 					user.setFarmBase(RS.getString(7));
 					user.setLoginCount(RS.getInt(8));
+					user.setGroup(RS.getString(15));
 	
 					if (username.equals(uid)) {
 	
 						if (password.equals(pwd)) {
-							session.setAttribute(
-									"USER_" + session.getId(), user);
-							this.updateLoginCount(user.getUserId(),
-									session);
-							success = true;
+							
+							if ("Dispatch".equals(user.getGroup())) {
+								session.setAttribute(
+										"USER_" + session.getId(), user);
+								this.updateLoginCount(user.getUserId(),
+										session);
+								success = true;
+							} else {
+								errors.add("Access denied. This user is not authorized to view this application.");
+								session.setAttribute("ERRORS", errors);
+								return false;
+							}
 						}
 	
 					}
@@ -1106,6 +1166,7 @@ public class DispatchDao {
 
 			if (donor.getDonorId() == null) {
 				Long rc = this.insertDonor(donor, session);
+				donor.setDonorId(rc);
 				addy.setDonorId(rc);
 
 				if (rc == 0)
@@ -1114,6 +1175,7 @@ public class DispatchDao {
 					d.setDonorId(rc);
 					confirmation = rc;
 					rc = this.insertAddress(addy, session);
+					addy.setAddressId(rc);
 					if (rc == 0)
 						return rc;
 				}
@@ -1125,14 +1187,15 @@ public class DispatchDao {
 
 			StringBuffer query = new StringBuffer();
 			query.append("INSERT INTO " + this.getDatabase() + ".DONATION (");
-			query.append(" DONOR_ID, DISPATCH_DATE, STATUS, SPECIAL_FLAG, CALL_REQUIREMENTS, AC, BEDDING, BEDDING_QTY_TYPE, BOOKS, BOOKS_QTY_TYPE, ");
+			query.append(" DONOR_ID, DISPATCH_DATE, LOCATION, STATUS, SPECIAL_FLAG, CALL_REQUIREMENTS, AC, BEDDING, BEDDING_QTY_TYPE, BOOKS, BOOKS_QTY_TYPE, ");
 			query.append(" CLOTHING, CLOTHING_QTY_TYPE, COMPUTER, DESK, CHEST, ARMOIRE, DRESSER, MIRROR, NIGHTSTAND, HEADBOARD, FOOTBOARD, RAILS, ");
 			query.append(" LAMP, LAWN_FURNITURE, MATTRESS, MATTRESS_QTY_SIZE, MISC_HOUSEHOLD_ITEMS, REFRIDGERATOR, STOVE, RECLINER, SOFA, LOVESEAT, ");
-			query.append(" WALL_UNIT, TABLES, CHAIR, TELEVISION, TELEVISION_SIZE, ELECTRONICS, WASHER, DRYER, EXERCISE_EQUIPMENT, SPECIAL_NOTES, ");
+			query.append(" WALL_UNIT, TABLES, TABLE_TYPE, CHAIR, CHAIR_TYPE, TELEVISION, TELEVISION_SIZE, ELECTRONICS, WASHER, DRYER, EXERCISE_EQUIPMENT, BOOKCASE, OTTOMAN, SPECIAL_NOTES, ");
 			query.append(" CREATION_DATE, CREATED_BY, FARM_BASE) VALUES (");
 
 			query.append(d.getDonorId() + ",");
 			query.append("'" + d.getDispatchDate() + "',");
+			query.append("'" + d.getLocation() + "',");
 			query.append("'" + d.getStatus().toUpperCase() + "',");
 			if (d.getSpecialFlag() == null || "".equals(d.getSpecialFlag())) {
 				query.append("'NO',");
@@ -1168,13 +1231,17 @@ public class DispatchDao {
 			query.append("'" + d.getLoveseat() + "',");
 			query.append("'" + d.getWallUnit() + "',");
 			query.append("'" + d.getTable() + "',");
+			query.append("'" + d.getTableType() + "',");
 			query.append("'" + d.getChair() + "',");
+			query.append("'" + d.getChairType() + "',");
 			query.append("'" + d.getTelevision() + "',");
 			query.append("'" + d.getTelevisionSize() + "',");
 			query.append("'" + d.getElectronics() + "',");
 			query.append("'" + d.getWasher() + "',");
 			query.append("'" + d.getDryer() + "',");
 			query.append("'" + d.getExerciseEquipment() + "',");
+			query.append("'" + d.getBookcase() + "',");
+			query.append("'" + d.getOttoman() + "',");
 			query.append("'" + d.getSpecialNotes() + "',");
 			query.append("'" + valid8r.getEpoch() + "',");
 			query.append("'" + d.getCreatedBy() + "', ");
@@ -1187,7 +1254,11 @@ public class DispatchDao {
 
 			if (generatedKeys.next())
 				key = generatedKeys.getLong(1);
-
+			d.setDonationId(key);
+			session.setAttribute("temp_donation",d );
+			session.setAttribute("temp_donor",donor );
+			session.setAttribute("temp_address",addy );
+			
 			// Clean up after ourselves
 			Stmt.close();
 			Conn.close();

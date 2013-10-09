@@ -10,6 +10,7 @@ public class SystemUser implements Serializable {
 	private String creationDate;
 	private String lastUpdatedDate;
 	private String userRole;
+	private String group;
 	private String farmBase;
 	private Integer loginCount;
 	private String createdBy;
@@ -70,6 +71,13 @@ public class SystemUser implements Serializable {
 	public void setLoginCount(Integer loginCount) {
 		this.loginCount = loginCount;
 	}
+	public String getGroup() {
+		return group;
+	}
+	public void setGroup(String group) {
+		this.group = group;
+	}
+	
 	
 	
 }

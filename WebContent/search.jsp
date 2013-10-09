@@ -47,7 +47,11 @@ function ucase(obj) {
                        <table width="800" cellpadding="0" cellspacing="0" border="0" class="grid">
                         	 <tr>
                             	<td colspan="7" height="25" bgcolor="#3b3f41">&nbsp;&nbsp;Donations</td>
-                            	<td bgcolor="#3b3f41" alight="right"><a href="<%=request.getContextPath()%>/ticket?action=Print"><img src="images/printer.png" height="20" width="20" title="Print Dispatches" alt="Print Dispatches"/></a></td>
+                            	<td bgcolor="#3b3f41" alight="right">
+                            		<% if (results.size()>0) { %>
+                            		<a href="<%=request.getContextPath()%>/ticket?action=Print"><img src="images/printer.png" height="20" width="20" title="Print Dispatches" alt="Print Dispatches"/></a>
+                            		<% } %>
+                            	</td>
                             </tr>   
                             <tr>
                             	<td height="23" valign="center" background="images/searchGroupBk.png" class="searchMenuHeader">
@@ -55,6 +59,38 @@ function ucase(obj) {
                                         <input type="text" name="firstname" size="20" maxlength="20" value="firstname" class="textboxSearch" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/>
                                         <input type="text" name="confirmation" size="15" maxlength="15" value="confirmation#" class="textboxSearch" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/> 
                                         <input type="text" name="dispatchDate" size="30" maxlength="10" value="date" class="tcal" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/>
+                                    
+                                    <select name="status"  class="ddlSearch">
+                                    <option value="">status</option>
+                                    <%
+                                    ArrayList ddl = (ArrayList)session.getAttribute("dllStatus");
+                                    if (ddl!=null) {
+                                      for (int j=0;j<ddl.size();j++) {
+                                        %>
+                                        <option 
+                                            value="<%=ddl.get(j)%>"
+                                            <%
+                                            if
+                                            (ddl.get(j).equals(DispatchServlet.getDonation().getStatus()))
+                                            {%>selected<%}%>>
+                                          <%=ddl.get(j)%>
+                                        </option>
+                                        <%
+                                      }
+                                      %>
+                                      <%
+                                    }
+                                    %>
+                                  </select>
+                                  
+                                  <select name="special"  class="ddlSearch">
+                                 	 <option value="">special</option>
+                                 	 <option value="YES">Yes</option>
+                                 	 <option value="NO">No</option>
+                                    
+                                  </select>
+                                         
+                                         
                                          </td>
                                 <td colspan="7" align="left" valign="center" background="images/searchGroupBk.png" class="searchMenuHeader">
                                 	<input type="submit" name="action" value="SearchTickets" class="imageButtonSearch" title="Search Tickets" />
@@ -76,7 +112,9 @@ function ucase(obj) {
                                             <td width="3" height="18" background="images/searchHeaderSpacer.png"></td>
                                             <td width="70" height="18" background="images/searchHeaderBk.png" class="searchFieldHeader">STATUS</td>
                                             <td width="3" height="18" background="images/searchHeaderSpacer.png"></td>
-                                            <td height="18" background="images/searchHeaderBk.png" class="searchFieldHeader">AGENT</td>
+                                            <td width="70" height="18" background="images/searchHeaderBk.png" class="searchFieldHeader">FARM</td>
+                                            <td width="3" height="18" background="images/searchHeaderSpacer.png"></td>
+                                           	<td height="18" background="images/searchHeaderBk.png" class="searchFieldHeader">AGENT</td>
                                         </tr>
                                         <% 
 										for (int i=0;i<results.size();i++) {
@@ -91,6 +129,14 @@ function ucase(obj) {
                                             <td colspan="2" class="searchFieldResult"><%=addy.getZipcode() %></td>
                                             <td colspan="2" class="searchFieldResult"><%=d.getSpecialFlag() %></td>
                                             <td colspan="2" class="searchFieldResult"><%=d.getStatus() %></td>
+                                            <td colspan="2" class="searchFieldResult">
+                                            <% if ("BOYNTON BEACH".equals(d.getFarmBase())) { %>
+                                            	 BYN
+                                            <% } else if ("FORT LAUDERDALE".equals(d.getFarmBase())) { %>
+                                             	FTL
+                                            <% } else { %>
+                                            	OKE <% } %>
+                                            </td>
                                             <td class="searchFieldResult"><%=d.getCreatedBy() %></td>
                                         </tr>
                                         <% } 

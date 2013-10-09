@@ -12,6 +12,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
+
+
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
 <link href="styles/style.css" rel="stylesheet" type="text/css" />
@@ -40,22 +42,22 @@
 			<tr>
 				<td align="center" border="0" bgcolor="#FFFFFF">
 					<div id="navigation"><div align="right">
-                    <font style="font: italic 11px Arial;color: #e4e4e4;text-align:right;">(<%=user.getUsername()%>&nbsp;&nbsp;/&nbsp;&nbsp;<%=new java.util.Date()%>)&nbsp;&nbsp;</font></div>&nbsp;&nbsp;
+                    <font style="font: italic 11px Arial;color: #e4e4e4;text-align:right;">(<%=user.getUsername()%>@<%=user.getFarmBase() %>&nbsp;&nbsp;/&nbsp;&nbsp;<%=new java.util.Date()%>)&nbsp;&nbsp;</font></div>&nbsp;&nbsp;
                     </br><div align="left">&nbsp;&nbsp;<img src="images/new_logo.png" /></div>
                     <%
-					if (user.getUserRole().equals("ADMIN")) {
+					if (user.getUserRole().equals("Dispatch_Administrator")) {
 					%>
                     <ul>
 		            	<li><a href="<%=request.getContextPath()%>/ticket?action=Home">Home</a></li>
 		                <li><a href="<%=request.getContextPath()%>/ticket?action=New">New Ticket</a></li>
 						<li><a href="<%=request.getContextPath()%>/ticket?action=Search">View/Edit Ticket</a></li>
 		                <li><a href="<%=request.getContextPath()%>/ticket?action=Level">Ticket Levels</a></li>
-                        <li><a href="<%=request.getContextPath()%>/ticket?action=Users">User Accounts</a></li>
+                        <!-- <li><a href="<%=request.getContextPath()%>/ticket?action=Users">User Accounts</a></li> -->
 						<li><a href="<%=request.getContextPath()%>/login?action=logout">Logout</a></li>
 					</ul> 
                     <% 
 					}
-					if (user.getUserRole().equals("AGENT")) {
+					if (user.getUserRole().equals("Dispatch_Agent")) {
 					%>
                     <ul>
 		            	<li><a href="<%=request.getContextPath()%>/ticket?action=Home">Home</a></li>

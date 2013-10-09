@@ -7,6 +7,7 @@ public class Donation implements Serializable {
 	private   Long donationId;
 	private   Long donorId;
 	
+	private String location="";
 	private   String status="";
 	private   String dispatchDate="";
 	private   String specialFlag="";
@@ -54,6 +55,10 @@ public class Donation implements Serializable {
 	private   String lastUpdatedDate="";
 	private   String updatedBy="";
 	private   String farmBase="";
+	private String tableType="";
+	private String chairType="";
+	private String bookcase="";
+	private String ottoman="";
 	
 	private   Donor donor=new Donor();
 	private   Address address=new Address();
@@ -362,6 +367,36 @@ public class Donation implements Serializable {
 	}
 	public void setAddress(Address address) {
 		this.address = address;
+	}
+	public String getTableType() {
+		return tableType;
+	}
+	public void setTableType(String tableType) {
+		this.tableType = tableType;
+	}
+	public String getChairType() {
+		return chairType;
+	}
+	public void setChairType(String chairType) {
+		this.chairType = chairType;
+	}
+	public String getLocation() {
+		return location;
+	}
+	public void setLocation(String location) {
+		this.location = location;
+	}
+	public String getBookcase() {
+		return bookcase;
+	}
+	public void setBookcase(String bookcase) {
+		this.bookcase = bookcase;
+	}
+	public String getOttoman() {
+		return ottoman;
+	}
+	public void setOttoman(String ottoman) {
+		this.ottoman = ottoman;
 	}
 	
 	

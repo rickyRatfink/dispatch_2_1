@@ -49,35 +49,38 @@ public class DispatchServlet extends HttpServlet {
 			
 		this.setFields(req);
 		
+		if ("CallLog".equals(action)) {
+			String subaction = req.getParameter("subaction");
+			
+			if ("Save".equals(subaction)) {
+			String type=req.getParameter("type");
+			String source=req.getParameter("source");
+			pass1 = validateCallLog(type,source,req);
+			
+			if (pass1) {
+				int retCode=dao.insertCallLog(type, source, user.getUsername(), user.getFarmBase(), session);
+				if (retCode!=1)
+					url="error.jsp";
+				else
+					url="newticket.jsp";
+			} 
+			else
+				url="call_log.jsp";
+			} else
+				action="Update";
+		}
+		
+		//After donation is saved it is temporarily stored in the session to prevent duplicate insert
+		//if user hits the back button on the call log page
+		if ("Save Ticket".equals(action)) {
+			Donation d = (Donation)session.getAttribute("temp_donation");
+			if (d!=null) 
+				action="Update Ticket";				
+		}
+			
 		if ("Home".equals(action)) {
-			GregorianCalendar calendar = new GregorianCalendar();
-			
-			Date now = calendar.getTime();
-			DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-			DateFormat df2 = new SimpleDateFormat("EEEE");
-			int limit = dao.getDailyLimit(df.format(now), session);
-			int count = dao.getDailyDispatchCount(df.format(now), session);
-			
-			req.setAttribute("LIMIT1", limit+"");
-			req.setAttribute("COUNT1", count+"");
-			req.setAttribute("DATE1", df2.format(now).substring(0,3)+" "+df.format(now));
-						
-			//Advance the calendar one day: 
-			for (int day=1;day<7;day++) {
-				Date tomorrow = calendar.getTime();
-				tomorrow.setTime(now.getTime() + (24*day)*60*60*1000);
-				String formattedDate = df.format(tomorrow);
-				String sDay = df2.format(tomorrow);
-				
-				limit = dao.getDailyLimit(formattedDate, session);
-				count = dao.getDailyDispatchCount(formattedDate, session);
-				req.setAttribute("LIMIT"+(day+1), limit+"");
-				req.setAttribute("COUNT"+(day+1), count+"");
-				req.setAttribute("DATE"+(day+1), sDay.substring(0,3)+" "+formattedDate);
-			}
-						
-			url="/main.jsp";
-			
+			this.loadLimits(req, session);
+			url="/main.jsp";			
 		}
 		else if ("SearchDonor".equals(action)) {
 			String firstname = req.getParameter("firstname");
@@ -97,14 +100,18 @@ public class DispatchServlet extends HttpServlet {
 			
 			Donor donor = dao.getDonor(donorId, session);
 			Address addy = dao.getAddress(addyId,session);
-			this.setDonor(donor);
+			this.setDonor(donor); 
 			this.setAddress(addy);
 			url="/newticket.jsp";
 		}
 		else if ("New".equals(action)) {
+			session.setAttribute("temp_donation", null);
+			session.setAttribute("temp_donor", null);
+			session.setAttribute("temp_address", null);
 			this.setDonation(new Donation());
 			this.setDonor(new Donor());
 			this.setAddress(new Address());
+			
 			
 			this.setFields(req);
 			
@@ -117,7 +124,9 @@ public class DispatchServlet extends HttpServlet {
 			this.setFields(req);
 			Date ddate = new java.util.Date();
 			DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-			int retCode = dao.searchTickets("", "", "", df.format(ddate), session);
+			String status = req.getParameter("status");
+			String special = req.getParameter("special");
+			int retCode = dao.searchTickets("", "", "", df.format(ddate), status, special, session);
 			if (retCode!=1)
 				url="error.jsp";
 			else 
@@ -129,9 +138,12 @@ public class DispatchServlet extends HttpServlet {
 			this.setDonor(new Donor());
 			this.setAddress(new Address());
 			this.setFields(req);
+			String status = req.getParameter("status");
+			String special = req.getParameter("special");
+			
 			Date ddate = new java.util.Date();
 			DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-			int retCode = dao.searchTickets("", "", "", df.format(ddate), session);
+			int retCode = dao.searchTickets("", "", "", df.format(ddate), status, special, session);
 			if (retCode!=1)
 				url="error.jsp";
 			else 
@@ -201,8 +213,12 @@ public class DispatchServlet extends HttpServlet {
 			if ("confirmation#".equals(confirmation)) confirmation="";
 			String dispatchDate=valid8r.cleanData(req.getParameter("dispatchDate"));
 			if ("date".equals(dispatchDate)) dispatchDate="";
+			String status=valid8r.cleanData(req.getParameter("status"));
+			if ("status".equals(status)) status="";
+			String special=valid8r.cleanData(req.getParameter("special"));
+			if ("special".equals(special)) special="";
 			
-			int retCode = dao.searchTickets(lastname, firstname, confirmation, dispatchDate, session);
+			int retCode = dao.searchTickets(lastname, firstname, confirmation, dispatchDate, status, special, session);
 			if (retCode!=1)
 				url="error.jsp";
 			else {
@@ -223,6 +239,7 @@ public class DispatchServlet extends HttpServlet {
 				if (retCode!=1)
 					url="error.jsp";
 				else {
+					this.loadLimits(req, session);
 					req.setAttribute("MESSAGE_"+session.getId(),"Password successfully changed");
 					url="main.jsp";
 				}
@@ -242,9 +259,27 @@ public class DispatchServlet extends HttpServlet {
 			url="newticket.jsp?update=Y";
 		}
 		else if ("Update Ticket".equals(action)) {
-			String sDonorId = req.getParameter("donorId");
-			String sAddyId = req.getParameter("addressId");
-			String sDonationId = req.getParameter("donationId");
+			 
+			String sDonorId="";
+			String sAddyId=""; 
+			String sDonationId="";
+			
+			//After donation is saved it is temporarily stored in the session to prevent duplicate insert
+			//if user hits the back button on the call log page
+			Donation d1 = (Donation)session.getAttribute("temp_donation");
+			Donor d2 = (Donor)session.getAttribute("temp_donor");
+			Address d3 = (Address)session.getAttribute("temp_address");
+			
+			if (d1!=null) {
+				sDonationId = d1.getDonationId().toString();
+				sAddyId = d3.getAddressId().toString();
+				sDonorId = d2.getDonorId().toString();
+				
+			} else {
+				sDonorId = req.getParameter("donorId");
+				sAddyId = req.getParameter("addressId");
+				sDonationId = req.getParameter("donationId");
+			}
 			Long donorId = new Long(sDonorId);
 			Long addyId = new Long(sAddyId);
 			Long donationId = new Long(sDonationId);
@@ -281,6 +316,12 @@ public class DispatchServlet extends HttpServlet {
 							url="error.jsp";
 						else {
 							req.setAttribute("MESSAGE", "Donation has been successfully updated.");
+							session.setAttribute("temp_donation", null);
+							session.setAttribute("temp_donor", null);
+							session.setAttribute("temp_address", null);
+							this.setDonation(new Donation());
+							this.setDonor(new Donor());
+							this.setAddress(new Address());
 							url="newticket.jsp";
 						}
 					}
@@ -290,6 +331,7 @@ public class DispatchServlet extends HttpServlet {
 				url="newticket.jsp?update=Y";
 		}
 		else if ("Save Ticket".equals(action)) {
+			
 			String update = req.getParameter("update");
 			if (update==null) update="";
 			pass1 = validateTicket(req);
@@ -394,21 +436,7 @@ public class DispatchServlet extends HttpServlet {
 				}
 			
 		}
-		else if ("CallLog".equals(action)) {
-			String type=req.getParameter("type");
-			String source=req.getParameter("source");
-			pass1 = validateCallLog(type,source,req);
-			
-			if (pass1) {
-				int retCode=dao.insertCallLog(type, source, user.getUsername(), user.getFarmBase(), session);
-				if (retCode!=1)
-					url="error.jsp";
-				else
-					url="newticket.jsp";
-			} 
-			else
-				url="call_log.jsp";
-		}
+
 		
 		}//end null user else
 		
@@ -426,6 +454,34 @@ public class DispatchServlet extends HttpServlet {
 		doGet(req, resp);
 	}
 
+	public void loadLimits(HttpServletRequest req, HttpSession session) {
+		GregorianCalendar calendar = new GregorianCalendar();
+		
+		Date now = calendar.getTime();
+		DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+		DateFormat df2 = new SimpleDateFormat("EEEE");
+		int limit = dao.getDailyLimit(df.format(now), session);
+		int count = dao.getDailyDispatchCount(df.format(now), session);
+		
+		req.setAttribute("LIMIT1", limit+"");
+		req.setAttribute("COUNT1", count+"");
+		req.setAttribute("DATE1", df2.format(now).substring(0,3)+" "+df.format(now));
+					
+		//Advance the calendar one day: 
+		for (int day=1;day<7;day++) {
+			Date tomorrow = calendar.getTime();
+			tomorrow.setTime(now.getTime() + (24*day)*60*60*1000);
+			String formattedDate = df.format(tomorrow);
+			String sDay = df2.format(tomorrow);
+			
+			limit = dao.getDailyLimit(formattedDate, session);
+			count = dao.getDailyDispatchCount(formattedDate, session);
+			req.setAttribute("LIMIT"+(day+1), limit+"");
+			req.setAttribute("COUNT"+(day+1), count+"");
+			req.setAttribute("DATE"+(day+1), sDay.substring(0,3)+" "+formattedDate);
+		}
+					
+	}
 	public boolean validateCallLog(String type, String source, HttpServletRequest req) {
 		boolean success = true;
 		Validator valid8r = new Validator();
@@ -567,13 +623,20 @@ public class DispatchServlet extends HttpServlet {
 		req.setAttribute("field10Err", fieldErr);
 		if (fieldErr.length() > 0)
 			success = false;
-
+/*
 		fieldErr = valid8r.validateRequired("Email Address", this.getDonor()
 				.getEmailAddress());
 		req.setAttribute("field11Err", fieldErr);
 		if (fieldErr.length() > 0)
 			success = false;
-
+*/
+		
+		fieldErr = valid8r.validateRequired("Subdivision", this.getAddress()
+				.getSubdivision());
+		req.setAttribute("field11Err", fieldErr);
+		if (fieldErr.length() > 0)
+			success = false;
+		
 		fieldErr = valid8r.validateRequired("Status", this
 				.getDonation().getStatus());
 		req.setAttribute("field13Err", fieldErr);
@@ -601,6 +664,65 @@ public class DispatchServlet extends HttpServlet {
 		} else 
 			this.getAddress().setGateFlag("NO");
 
+		
+		if (this.getDonation().getTelevision().length()>0) {
+		fieldErr = valid8r.validateRequired("Television Size", this
+					.getDonation().getTelevisionSize());
+			req.setAttribute("field15Err", fieldErr);
+			if (fieldErr.length() > 0)
+				success = false;
+		}
+		
+		if (this.getDonation().getTable().length()>0) {
+		fieldErr = valid8r.validateRequired("Table Type", this
+					.getDonation().getTableType());
+			req.setAttribute("field16Err", fieldErr);
+			if (fieldErr.length() > 0)
+				success = false;
+		}
+		
+		if (this.getDonation().getChair().length()>0) {
+		fieldErr = valid8r.validateRequired("Chair Type", this
+					.getDonation().getChairType());
+			req.setAttribute("field17Err", fieldErr);
+			if (fieldErr.length() > 0)
+				success = false;
+		}
+		
+		
+		
+		if (this.getDonation().getClothing().length()>0) {
+			fieldErr = valid8r.validateRequired("Clothing Qty", this
+						.getDonation().getClothingQtyType());
+				req.setAttribute("field18Err", fieldErr);
+				if (fieldErr.length() > 0)
+					success = false;
+			}
+		
+		if (this.getDonation().getBooks().length()>0) {
+			fieldErr = valid8r.validateRequired("Books Qty", this
+						.getDonation().getBooksQtyType());
+				req.setAttribute("field19Err", fieldErr);
+				if (fieldErr.length() > 0)
+					success = false;
+			}
+		
+		if (this.getDonation().getBedding().length()>0) {
+			fieldErr = valid8r.validateRequired("Bedding Qty", this
+						.getDonation().getBeddingQtyType());
+				req.setAttribute("field20Err", fieldErr);
+				if (fieldErr.length() > 0)
+					success = false;
+			}
+		
+		if (this.getDonation().getMattress().length()>0) {
+			fieldErr = valid8r.validateRequired("Mattress size", this
+						.getDonation().getMattressQtyType());
+				req.setAttribute("field21Err", fieldErr);
+				if (fieldErr.length() > 0)
+					success = false;
+			}
+		
 		return success;
 	}
 
@@ -655,6 +777,7 @@ public class DispatchServlet extends HttpServlet {
 		this.getDonation().setCallRequirements(valid8r.cleanData(req.getParameter("callRequirements")));
 		this.getDonation().setStatus(valid8r.cleanData(req.getParameter("status")));
 		this.getDonation().setDispatchDate(valid8r.cleanData(req.getParameter("dispatchDate")));
+		this.getDonation().setLocation(valid8r.cleanData(req.getParameter("location")));
 		this.getDonation().setMattressQtyType(valid8r.cleanData(req.getParameter("mattressQtySize")));
 		this.getDonation().setTelevisionSize(valid8r.cleanData(req.getParameter("televisionSize")));
 		this.getDonation().setBeddingQtyType(valid8r.cleanData(req.getParameter("beddingQtyType")));
@@ -665,6 +788,8 @@ public class DispatchServlet extends HttpServlet {
 		this.getDonation().setBedding(valid8r.cleanData(req.getParameter("bedding")));
 		this.getDonation().setBooks(valid8r.cleanData(req.getParameter("books")));
 		this.getDonation().setClothing(valid8r.cleanData(req.getParameter("clothing")));
+		
+	
 		this.getDonation().setComputer(valid8r.cleanData(req.getParameter("computer")));
 		this.getDonation().setDesk(valid8r.cleanData(req.getParameter("desk")));
 		this.getDonation().setChest(valid8r.cleanData(req.getParameter("chest")));
@@ -686,13 +811,18 @@ public class DispatchServlet extends HttpServlet {
 		this.getDonation().setLoveseat(valid8r.cleanData(req.getParameter("loveseat")));
 		this.getDonation().setWallUnit(valid8r.cleanData(req.getParameter("wallUnit")));
 		this.getDonation().setTable(valid8r.cleanData(req.getParameter("table")));
+		this.getDonation().setTableType(valid8r.cleanData(req.getParameter("tableType")));
 		this.getDonation().setChair(valid8r.cleanData(req.getParameter("chair")));
+		this.getDonation().setChairType(valid8r.cleanData(req.getParameter("chairType")));
 		this.getDonation().setTelevision(valid8r.cleanData(req.getParameter("television")));
+		this.getDonation().setTelevisionSize(valid8r.cleanData(req.getParameter("televisionSize")));
 		this.getDonation().setElectronics(valid8r.cleanData(req.getParameter("electronics")));
 		this.getDonation().setWasher(valid8r.cleanData(req.getParameter("washer")));
 		this.getDonation().setDryer(valid8r.cleanData(req.getParameter("dryer")));
 		this.getDonation().setExerciseEquipment(valid8r.cleanData(req.getParameter("exerciseEquipment")));
 		this.getDonation().setSpecialNotes(valid8r.cleanData(req.getParameter("specialNotes")));
+		this.getDonation().setBookcase(valid8r.cleanData(req.getParameter("bookcase")));
+		this.getDonation().setOttoman(valid8r.cleanData(req.getParameter("ottoman")));
 	} 
 
 	public static Donor getDonor() {

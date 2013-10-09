@@ -1,7 +1,11 @@
 package org.faithfarm.dispatch;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,8 +32,10 @@ public class SecureLogin extends HttpServlet {
 			      
 			      if ("login".equals(action)) 
 			    	  this.secureLogin(req, resp, session);			      
-			      else if ("logout".equals(action))
+			      else if ("logout".equals(action)) {
+			    	  session.invalidate();
 			    	  req.getRequestDispatcher("/logout.jsp").forward(req, resp);
+			      }
 			    	  
 	 } 
 	 
@@ -46,10 +52,10 @@ public class SecureLogin extends HttpServlet {
 	      
 	      session.setAttribute("ERRORS", new ArrayList());
 	      boolean success=dao.secureLogin(username, password, session);
-	      System.out.println(success);
+	    
 	      if (success) {
 	    	  buildStateList(session);
-	    	  
+	    	  this.loadLimits(req, session);
 	    	  SystemUser user = (SystemUser)session.getAttribute("USER_" + session.getId());
 	    	  if (user.getLoginCount().intValue()==0)
 	    		  next="setpassword.jsp";	    	  
@@ -61,6 +67,34 @@ public class SecureLogin extends HttpServlet {
 	      req.getRequestDispatcher("/"+next).forward(req, resp);
 	    }
 	 
+	  private void loadLimits( HttpServletRequest req, HttpSession session) {
+			GregorianCalendar calendar = new GregorianCalendar();
+			
+			Date now = calendar.getTime();
+			DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+			DateFormat df2 = new SimpleDateFormat("EEEE");
+			int limit = dao.getDailyLimit(df.format(now), session);
+			int count = dao.getDailyDispatchCount(df.format(now), session);
+			
+			req.setAttribute("LIMIT1", limit+"");
+			req.setAttribute("COUNT1", count+"");
+			req.setAttribute("DATE1", df2.format(now).substring(0,3)+" "+df.format(now));
+						
+			//Advance the calendar one day: 
+			for (int day=1;day<7;day++) {
+				Date tomorrow = calendar.getTime();
+				tomorrow.setTime(now.getTime() + (24*day)*60*60*1000);
+				String formattedDate = df.format(tomorrow);
+				String sDay = df2.format(tomorrow);
+				
+				limit = dao.getDailyLimit(formattedDate, session);
+				count = dao.getDailyDispatchCount(formattedDate, session);
+				req.setAttribute("LIMIT"+(day+1), limit+"");
+				req.setAttribute("COUNT"+(day+1), count+"");
+				req.setAttribute("DATE"+(day+1), sDay.substring(0,3)+" "+formattedDate);
+			}
+						
+	  }
 	   public void buildStateList(HttpSession session)
 	    {
 		   
@@ -148,9 +182,11 @@ public class SecureLogin extends HttpServlet {
 	        callReq.add("one hour call");
 	        
 	        ArrayList location = new ArrayList();
+	        location.add("inside");
 	        location.add("carport");
 	        location.add("outside");
 	        location.add("porch");
+	        location.add("other");
 	        
 	        ArrayList structureType = new ArrayList();
 	        structureType.add("apartment");
@@ -186,7 +222,6 @@ public class SecureLogin extends HttpServlet {
 	        source.add("radio/tv ad");
 	        source.add("friend/relative");
 	        source.add("internet");
-	        source.add("yellow pages");
 	        source.add("other");
 	        
 	        ArrayList gate = new ArrayList();
@@ -217,6 +252,22 @@ public class SecureLogin extends HttpServlet {
 	        tvsize.add("31-inch");
 	        tvsize.add("40-inch");
 	        tvsize.add("48-inch");
+	        tvsize.add("Other");
+	        
+	        
+	        ArrayList tableType = new ArrayList();
+	        tableType.add("Dining");
+	        tableType.add("End");
+	        tableType.add("Coffee");
+	        tableType.add("Kitchen");
+	        tableType.add("Other");
+	        tableType.add("Mixed Types");
+	        
+	        ArrayList chairType = new ArrayList();
+	        chairType.add("Dinette");
+	        chairType.add("Kitchen table");
+	        chairType.add("Other");
+	        chairType.add("Mixed Types");
 	        
 	        
 	        session.setAttribute("dllSuffix",convertToUpperCase(suffix));
@@ -234,6 +285,8 @@ public class SecureLogin extends HttpServlet {
 	        session.setAttribute("dllQtyType",convertToUpperCase(qtyType));
 	        session.setAttribute("dllMattress",convertToUpperCase(mattress));
 	        session.setAttribute("dllTvSize",convertToUpperCase(tvsize));
+	        session.setAttribute("dllTableType",convertToUpperCase(tableType));
+	        session.setAttribute("dllChairType",convertToUpperCase(chairType));
 	        
 	   }
 	   

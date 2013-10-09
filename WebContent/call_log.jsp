@@ -1,4 +1,7 @@
 <%@ page import="org.faithfarm.dispatch.DispatchServlet" %>
+<%@ page import="org.faithfarm.domain.Donation" %>
+<%@ page import="org.faithfarm.domain.Donor" %>
+<%@ page import="org.faithfarm.domain.Address" %>
 <%@ page import="java.util.ArrayList" %>
  
 <%
@@ -11,8 +14,15 @@
 	 
 		String message=(String)request.getAttribute("MESSAGE");	
 	if (message==null) message="";
+	
+	Donation d1 = (Donation)session.getAttribute("temp_donation");
+	Donor d2 = (Donor)session.getAttribute("temp_donor");
+	Address d3 = (Address)session.getAttribute("temp_address");
+	
+	
 %>
 <jsp:include page="header.jsp" flush="true"/>
+
 
 
 <form method="POST" action="<%=request.getContextPath()%>/ticket?action=CallLog"> 
@@ -20,7 +30,7 @@
             	<td align="left" valign="center" border="0" bgcolor="#FFFFFF">
                         <h1>Call Information</h1>
                         <% if (message.length()>0) { %>
-                        <h5><img src="images/success.png"/><%=message %></h5>
+                        <h5><img src="images/success.png"/><%=message %></h5> 
                         <% } %>
                 		<table width="400" cellpadding="0" cellspacing="0" border="0">
                         	<tr>
@@ -75,7 +85,15 @@
                                 
                             </tr>
                             <tr>
-                             <td colspan="3" align="right"></br><input type="submit" name="action" value="Save" class="imageButtonSaveOnly" title="Save" /></td>
+                             <td colspan="3" align="right">
+                             	</br>
+                             		<input type="submit" name="subaction" value="Save"  title="Save" />
+                             		<input type="submit" name="subaction" value="Update"  title="Save" />
+                             		<input type="hidden" name="id1" value="<%=d2.getDonorId()%>"/>
+                             		<input type="hidden" name="id2" value="<%=d3.getAddressId()%>"/>
+                             		<input type="hidden" name="id3" value="<%=d1.getDonationId()%>"/>
+                             		
+                             </td>
                              <td></td>
                             </tr>
                   		</table>
