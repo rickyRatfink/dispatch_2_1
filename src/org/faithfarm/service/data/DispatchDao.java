@@ -80,7 +80,7 @@ public class DispatchDao {
 			Statement Stmt = Conn.createStatement();
 			StringBuffer s = new StringBuffer("SELECT DAILY_LIMIT FROM "
 					+ this.getDatabase() + ".DAILY_LIMIT ");
-			s.append("WHERE DISPATCH_DATE='" + sDate + "' AND farm_base='"+user.getFarmBase()+"' ");
+			s.append("WHERE DISPATCH_DATE='" + sDate + "' AND farm_base='"+user.getFarmBase().toUpperCase()+"' ");
 			ResultSet RS = Stmt.executeQuery(s.toString());
 
 			if (RS == null)
@@ -119,7 +119,7 @@ public class DispatchDao {
 			Statement Stmt = Conn.createStatement();
 			StringBuffer s = new StringBuffer("SELECT COUNT(DONATION_ID) FROM "
 					+ this.getDatabase() + ".DONATION ");
-			s.append("WHERE DISPATCH_DATE='" + sDate + "' and farm_base='"+user.getFarmBase()+"' ");
+			s.append("WHERE DISPATCH_DATE='" + sDate + "' and farm_base='"+user.getFarmBase().toUpperCase()+"' ");
 			ResultSet RS = Stmt.executeQuery(s.toString());
 			if (RS == null)
 				count = 0;
@@ -788,8 +788,31 @@ public class DispatchDao {
 
 		return addy;
 	}
+    public boolean deleteTicket(Integer id, HttpSession session) {
+    	
+    	boolean success=false;
+    	
+    	try {
 
-	public int searchTickets(String lastname, String firstname,
+			Connection Conn = this.getConnection();
+
+			// Do something with the Connection
+			Statement Stmt = Conn.createStatement();
+			StringBuffer s = new StringBuffer("DELETE FROM " + this.getDatabase() + ".DONATION WHERE DONATION_ID="+id);
+			success=Stmt.execute(s.toString());
+    	}
+			catch (SQLException E) {
+				success = false;
+				session.setAttribute("SYSTEM_ERROR", E.getMessage());
+			} catch (ClassNotFoundException e) {
+				success = false;
+				session.setAttribute("SYSTEM_ERROR", e.getMessage());
+				e.printStackTrace();
+			}
+
+			return success;
+    }
+	public int searchTickets(String lastname, String firstname, String zipcode,
 			String confirmation, String dispatchDate, String status, String special, HttpSession session) {
 		int retCode = 1;
 		ArrayList results = new ArrayList();
@@ -810,18 +833,17 @@ public class DispatchDao {
 				s.append("AND DONOR.LASTNAME='" + lastname + "'  ");
 			if (firstname.length() > 0)
 				s.append("AND DONOR.FIRSTNAME='" + firstname + "'  ");
+			if (zipcode.length() > 0)
+				s.append("AND ADDRESS.zipcode='" + zipcode + "'  ");
 			if (confirmation.length() > 0)
 				s.append("AND DONATION.DONATION_ID='" + confirmation + "'  ");
 			if (dispatchDate.length() > 0)
 				s.append("AND DONATION.DISPATCH_DATE='" + dispatchDate + "'  ");
-			if (status.length() > 0)
+			if (status!=null&&status.length() > 0)
 				s.append("AND DONATION.STATUS='" + status + "'  ");
-			if (special.length() > 0)
+			if (special!=null&&special.length() > 0)
 				s.append("AND DONATION.SPECIAL_FLAG='" + special + "'  ");
-			s.append("AND DONATION.FARM_BASE='"+user.getFarmBase().toUpperCase()+"'  ");
-			
-			System.out.println (s);
-			
+			s.append("AND DONATION.FARM_BASE='"+user.getFarmBase().toUpperCase().toUpperCase()+"'  ");
 			ResultSet RS = Stmt.executeQuery(s.toString());
 			while (RS.next()) {
 				Donation d = new Donation();
@@ -1245,7 +1267,7 @@ public class DispatchDao {
 			query.append("'" + d.getSpecialNotes() + "',");
 			query.append("'" + valid8r.getEpoch() + "',");
 			query.append("'" + d.getCreatedBy() + "', ");
-			query.append("'" + d.getFarmBase() + "' );");
+			query.append("'" + d.getFarmBase().toUpperCase() + "' );");
 
 			Stmt = Conn.prepareStatement(query.toString(),
 					Stmt.RETURN_GENERATED_KEYS);
@@ -1384,7 +1406,7 @@ public class DispatchDao {
 			query.append("'" + valid8r.getEpoch() + "',");
 			query.append("'" + d.getCreatedBy() + "',");
 			query.append("'" + d.getUserRole() + "',");
-			query.append("'" + d.getFarmBase() + "');");
+			query.append("'" + d.getFarmBase().toUpperCase() + "');");
 
 			PreparedStatement Stmt = null;
 			Stmt = Conn.prepareStatement(query.toString(),

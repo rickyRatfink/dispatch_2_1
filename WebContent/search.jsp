@@ -3,7 +3,8 @@
 <%@ page import="org.faithfarm.domain.Donor" %>
 <%@ page import="org.faithfarm.domain.Address" %>
 <%@ page import="java.util.ArrayList" %>
- 
+<%@ page import="org.faithfarm.domain.SystemUser" %>
+
 <%
 
 	String required = "<img src='images/required.png'/>"; 
@@ -15,6 +16,10 @@
 	ArrayList results = (ArrayList)session.getAttribute("RESULTS_"+session.getId());
 	if (results==null) results=new ArrayList();
 	
+ 
+	  SystemUser user = (SystemUser)session.getAttribute("USER_"+session.getId()); 
+	  if (user==null) user=new SystemUser();
+
 %>
 <jsp:include page="header.jsp" flush="true"/>
 
@@ -55,10 +60,11 @@ function ucase(obj) {
                             </tr>   
                             <tr>
                             	<td height="23" valign="center" background="images/searchGroupBk.png" class="searchMenuHeader">
-                                		<input type="text" name="lastname" size="25" maxlength="20" value="lastname" class="textboxSearch" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/>
-                                        <input type="text" name="firstname" size="20" maxlength="20" value="firstname" class="textboxSearch" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/>
-                                        <input type="text" name="confirmation" size="15" maxlength="15" value="confirmation#" class="textboxSearch" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/> 
-                                        <input type="text" name="dispatchDate" size="30" maxlength="10" value="date" class="tcal" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/>
+                                		<input type="text" name="lastname" size="25" maxlength="20" value="<%=session.getAttribute("lastname") %>" class="textboxSearch" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/>
+                                        <input type="text" name="firstname" size="20" maxlength="20" value="<%=session.getAttribute("firstname") %>" class="textboxSearch" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/>
+                                        <input type="text" name="zipcode" size="10" maxlength="10" value="<%=session.getAttribute("zipcode") %>" class="textboxSearch" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/>
+                                        <input type="text" name="confirmation" size="15" maxlength="15" value="<%=session.getAttribute("confirmation") %>" class="textboxSearch" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/> 
+                                        <input type="text" name="dispatchDate" size="30" maxlength="10" value="<%=session.getAttribute("dispatchDate") %>" class="tcal" onfocus="javascript:this.value='';" onkeyup="ucase(this)"/>
                                     
                                     <select name="status"  class="ddlSearch">
                                     <option value="">status</option>
@@ -71,7 +77,7 @@ function ucase(obj) {
                                             value="<%=ddl.get(j)%>"
                                             <%
                                             if
-                                            (ddl.get(j).equals(DispatchServlet.getDonation().getStatus()))
+                                            (ddl.get(j).equals((String)session.getAttribute("status")))
                                             {%>selected<%}%>>
                                           <%=ddl.get(j)%>
                                         </option>
@@ -85,8 +91,8 @@ function ucase(obj) {
                                   
                                   <select name="special"  class="ddlSearch">
                                  	 <option value="">special</option>
-                                 	 <option value="YES">Yes</option>
-                                 	 <option value="NO">No</option>
+                                 	 <option value="YES" <% if ("YES".equals((String)session.getAttribute("special"))) {%>selected<%} %>>Yes</option>
+                                 	 <option value="NO" <% if ("NO".equals((String)session.getAttribute("special"))) {%>selected<%} %>>No</option>
                                     
                                   </select>
                                          
@@ -123,7 +129,14 @@ function ucase(obj) {
 											Address addy = d.getAddress();
 										%>
                                          <tr>
-                                            <td colspan="2" class="searchFieldResult"><a href="<%=request.getContextPath()%>/ticket?action=Update&id1=<%=d.getDonor().getDonorId()%>&id2=<%=d.getAddress().getAddressId()%>&id3=<%=d.getDonationId()%>"><%=d.getDonationId() %></a></td>
+                                            <td colspan="2" class="searchFieldResult">
+                                            	<a href="<%=request.getContextPath()%>/ticket?action=Update&id1=<%=d.getDonor().getDonorId()%>&id2=<%=d.getAddress().getAddressId()%>&id3=<%=d.getDonationId()%>"><%=d.getDonationId() %></a>
+                                            	<%
+												 if (user.getUserRole().equals("Administrator")) {
+												 %>&nbsp;&nbsp;
+                                            	<a href="<%=request.getContextPath()%>/ticket?action=Delete&id=<%=d.getDonationId()%>"><img src="<%=request.getContextPath() %>/images/DeleteRed.png"/></a>
+                                            	<% } %>
+                                            </td>
                                             <td colspan="2" class="searchFieldResult"><%=donor.getLastname() %>,&nbsp;<%=donor.getFirstname() %></td>
                                             <td colspan="2" class="searchFieldResult"><%=d.getDispatchDate() %></td>
                                             <td colspan="2" class="searchFieldResult"><%=addy.getZipcode() %></td>

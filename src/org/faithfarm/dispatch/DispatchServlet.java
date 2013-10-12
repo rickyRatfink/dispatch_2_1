@@ -38,7 +38,6 @@ public class DispatchServlet extends HttpServlet {
 		Validator valid8r = new Validator();
 		boolean pass1 = false;
 		String url="main.jsp";
-			
 		try {
 		
 		SystemUser user = (SystemUser)session.getAttribute("USER_"+session.getId());
@@ -48,6 +47,7 @@ public class DispatchServlet extends HttpServlet {
 		else {
 			
 		this.setFields(req);
+		this.loadLimits(req, session);
 		
 		if ("CallLog".equals(action)) {
 			String subaction = req.getParameter("subaction");
@@ -61,8 +61,10 @@ public class DispatchServlet extends HttpServlet {
 				int retCode=dao.insertCallLog(type, source, user.getUsername(), user.getFarmBase(), session);
 				if (retCode!=1)
 					url="error.jsp";
-				else
+				else {
+					session.setAttribute("temp_donation", null);
 					url="newticket.jsp";
+				}
 			} 
 			else
 				url="call_log.jsp";
@@ -72,16 +74,47 @@ public class DispatchServlet extends HttpServlet {
 		
 		//After donation is saved it is temporarily stored in the session to prevent duplicate insert
 		//if user hits the back button on the call log page
-		if ("Save Ticket".equals(action)) {
+		else if ("Save Ticket".equals(action)) {
 			Donation d = (Donation)session.getAttribute("temp_donation");
 			if (d!=null) 
 				action="Update Ticket";				
 		}
-			
+		
+		
 		if ("Home".equals(action)) {
-			this.loadLimits(req, session);
+			//this.loadLimits(req, session);
 			url="/main.jsp";			
 		}
+		else if ("Delete".equals(action)) {
+			String id = req.getParameter("id");
+			boolean retCode=dao.deleteTicket(Integer.parseInt(id),session);
+			if (retCode)
+				url="error.jsp";
+			else {
+				session.setAttribute("lastname", "lastname");
+				session.setAttribute("firstname", "firstname");
+				session.setAttribute("zipcode", "zipcode");
+				session.setAttribute("confirmation", "confirmation#");
+				session.setAttribute("dispatchDate", "date");
+				session.setAttribute("status", "status");
+				session.setAttribute("special", "special");	
+
+				this.setDonation(new Donation());
+				this.setDonor(new Donor());
+				this.setAddress(new Address());
+				this.setFields(req);
+				Date ddate = new java.util.Date();
+				DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+				String status = req.getParameter("status");
+				String special = req.getParameter("special");
+				int success = dao.searchTickets("", "", "", "", df.format(ddate), status, special, session);
+				if (success!=1)
+					url="error.jsp";
+				else 
+					url="search.jsp";
+							
+			}
+		}	
 		else if ("SearchDonor".equals(action)) {
 			String firstname = req.getParameter("firstname");
 			String lastname = req.getParameter("lastname");
@@ -118,6 +151,14 @@ public class DispatchServlet extends HttpServlet {
 			url="newticket.jsp";
 		}
 		else if ("Search".equals(action)) {
+			session.setAttribute("lastname", "lastname");
+			session.setAttribute("firstname", "firstname");
+			session.setAttribute("zipcode", "zipcode");
+			session.setAttribute("confirmation", "confirmation#");
+			session.setAttribute("dispatchDate", "date");
+			session.setAttribute("status", "status");
+			session.setAttribute("special", "special");	
+
 			this.setDonation(new Donation());
 			this.setDonor(new Donor());
 			this.setAddress(new Address());
@@ -126,7 +167,8 @@ public class DispatchServlet extends HttpServlet {
 			DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
 			String status = req.getParameter("status");
 			String special = req.getParameter("special");
-			int retCode = dao.searchTickets("", "", "", df.format(ddate), status, special, session);
+			String zipcode = req.getParameter("zipcode");
+			int retCode = dao.searchTickets("", "", "","", df.format(ddate), status, special, session);
 			if (retCode!=1)
 				url="error.jsp";
 			else 
@@ -138,12 +180,14 @@ public class DispatchServlet extends HttpServlet {
 			this.setDonor(new Donor());
 			this.setAddress(new Address());
 			this.setFields(req);
-			String status = req.getParameter("status");
-			String special = req.getParameter("special");
-			
-			Date ddate = new java.util.Date();
-			DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-			int retCode = dao.searchTickets("", "", "", df.format(ddate), status, special, session);
+			String lastname=(String)session.getAttribute("lastname");
+			String firstname=(String)session.getAttribute("firstname");
+			String zipcode=(String)session.getAttribute("zipcode");
+			String confirmation=(String)session.getAttribute("confirmation");
+			String dispatchDate=(String)session.getAttribute("dispatchDate");
+			String status=(String)session.getAttribute("status");
+			String special=(String)session.getAttribute("special");
+			int retCode = dao.searchTickets(lastname, firstname, zipcode, confirmation, dispatchDate, status, special, session);
 			if (retCode!=1)
 				url="error.jsp";
 			else 
@@ -205,10 +249,13 @@ public class DispatchServlet extends HttpServlet {
 			}
 		}
 		else if ("SearchTickets".equals(action)) {
+			
 			String lastname=valid8r.cleanData(req.getParameter("lastname"));
 			if ("lastname".equals(lastname)) lastname="";
 			String firstname=valid8r.cleanData(req.getParameter("firstname"));
 			if ("firstname".equals(firstname)) firstname="";
+			String zipcode=valid8r.cleanData(req.getParameter("zipcode"));
+			if ("zipcode".equals(zipcode)) zipcode="";
 			String confirmation=valid8r.cleanData(req.getParameter("confirmation"));
 			if ("confirmation#".equals(confirmation)) confirmation="";
 			String dispatchDate=valid8r.cleanData(req.getParameter("dispatchDate"));
@@ -218,7 +265,15 @@ public class DispatchServlet extends HttpServlet {
 			String special=valid8r.cleanData(req.getParameter("special"));
 			if ("special".equals(special)) special="";
 			
-			int retCode = dao.searchTickets(lastname, firstname, confirmation, dispatchDate, status, special, session);
+			session.setAttribute("lastname", lastname);
+			session.setAttribute("firstname", firstname);
+			session.setAttribute("zipcode", zipcode);
+			session.setAttribute("confirmation", confirmation);
+			session.setAttribute("dispatchDate", dispatchDate);
+			session.setAttribute("status", status);
+			session.setAttribute("special", special);
+			
+			int retCode = dao.searchTickets(lastname, firstname, zipcode, confirmation, dispatchDate, status, special, session);
 			if (retCode!=1)
 				url="error.jsp";
 			else {
@@ -258,6 +313,7 @@ public class DispatchServlet extends HttpServlet {
 			this.setDonation(dao.getDonation(donationId, session));
 			url="newticket.jsp?update=Y";
 		}
+		
 		else if ("Update Ticket".equals(action)) {
 			 
 			String sDonorId="";

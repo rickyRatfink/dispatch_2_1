@@ -45,19 +45,20 @@
                     <font style="font: italic 11px Arial;color: #e4e4e4;text-align:right;">(<%=user.getUsername()%>@<%=user.getFarmBase() %>&nbsp;&nbsp;/&nbsp;&nbsp;<%=new java.util.Date()%>)&nbsp;&nbsp;</font></div>&nbsp;&nbsp;
                     </br><div align="left">&nbsp;&nbsp;<img src="images/new_logo.png" /></div>
                     <%
-					if (user.getUserRole().equals("Dispatch_Administrator")) {
+					if (user.getUserRole().equals("Administrator")) {
 					%>
                     <ul>
 		            	<li><a href="<%=request.getContextPath()%>/ticket?action=Home">Home</a></li>
 		                <li><a href="<%=request.getContextPath()%>/ticket?action=New">New Ticket</a></li>
 						<li><a href="<%=request.getContextPath()%>/ticket?action=Search">View/Edit Ticket</a></li>
 		                <li><a href="<%=request.getContextPath()%>/ticket?action=Level">Ticket Levels</a></li>
+		                <li><a href="call_log.jsp">Call Log</a></li>
                         <!-- <li><a href="<%=request.getContextPath()%>/ticket?action=Users">User Accounts</a></li> -->
 						<li><a href="<%=request.getContextPath()%>/login?action=logout">Logout</a></li>
 					</ul> 
                     <% 
 					}
-					if (user.getUserRole().equals("Dispatch_Agent")) {
+					if (user.getUserRole().equals("Agent")) {
 					%>
                     <ul>
 		            	<li><a href="<%=request.getContextPath()%>/ticket?action=Home">Home</a></li>
