@@ -106,6 +106,8 @@ function ucase(obj) {
                             	<td colspan="9">
                                     <table width="800" cellpadding="0" cellspacing="0">
                                         <tr>
+                                            <td width="5" height="18" background="images/searchHeaderBk.png" class="searchFieldHeader"></td>
+                                            <td width="3" height="18" background="images/searchHeaderSpacer.png"></td>
                                             <td width="90" height="18" background="images/searchHeaderBk.png" class="searchFieldHeader">CONFIRMATION</td>
                                             <td width="3" height="18" background="images/searchHeaderSpacer.png"></td>
                                             <td width="150" height="18" background="images/searchHeaderBk.png" class="searchFieldHeader">DONOR</td>
@@ -129,6 +131,7 @@ function ucase(obj) {
 											Address addy = d.getAddress();
 										%>
                                          <tr>
+                                         	<td colspan="2" class="searchFieldResult"><%=i+1 %></td>
                                             <td colspan="2" class="searchFieldResult">
                                             	<a href="<%=request.getContextPath()%>/ticket?action=Update&id1=<%=d.getDonor().getDonorId()%>&id2=<%=d.getAddress().getAddressId()%>&id3=<%=d.getDonationId()%>"><%=d.getDonationId() %></a>
                                             	<%

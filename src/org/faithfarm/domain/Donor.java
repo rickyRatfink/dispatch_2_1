@@ -14,6 +14,9 @@ public class Donor implements Serializable {
 	private String lastUpdatedDate="";
 	private String createdBy="";
 	private String udpatedBy="";
+	private String phoneOther="";
+	
+	
 	
 	
 	public Long getDonorId() {
@@ -75,6 +78,12 @@ public class Donor implements Serializable {
 	}
 	public void setUdpatedBy(String udpatedBy) {
 		this.udpatedBy = udpatedBy;
+	}
+	public String getPhoneOther() {
+		return phoneOther;
+	}
+	public void setPhoneOther(String phoneOther) {
+		this.phoneOther = phoneOther;
 	}
 	
 	

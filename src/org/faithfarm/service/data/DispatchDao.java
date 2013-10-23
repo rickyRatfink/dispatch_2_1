@@ -171,6 +171,7 @@ public class DispatchDao {
 				donor.setLastUpdatedDate(RS.getString(8));
 				donor.setCreatedBy(RS.getString(9));
 				donor.setUdpatedBy(RS.getString(10));
+				donor.setPhoneOther(RS.getString(11));
 			}
 			RS.close();
 			Stmt.close();
@@ -191,6 +192,9 @@ public class DispatchDao {
 		int retCode = 1;
 		ArrayList results1 = new ArrayList();
 		ArrayList results2 = new ArrayList();
+
+		lastname = Validator.cleanForSql(lastname);
+		firstname = Validator.cleanForSql(firstname);
 
 		try {
 
@@ -220,27 +224,28 @@ public class DispatchDao {
 				donor.setLastUpdatedDate(RS.getString(8));
 				donor.setCreatedBy(RS.getString(9));
 				donor.setUdpatedBy(RS.getString(10));
-
-				addy.setAddressId(RS.getLong(11));
-				addy.setDonorId(RS.getLong(12));
-				addy.setLine1(RS.getString(13));
-				addy.setLine2(RS.getString(14));
-				addy.setCity(RS.getString(15));
-				addy.setState(RS.getString(16));
-				addy.setZipcode(RS.getString(17));
-				addy.setMajorIntersection(RS.getString(18));
-				addy.setSubdivision(RS.getString(19));
-				addy.setStreetSuffix(RS.getString(20));
-				addy.setStructureType(RS.getString(21));
-				addy.setUnit(RS.getString(22));
-				addy.setBuilding(RS.getString(23));
-				addy.setFloor(RS.getString(24));
-				addy.setElevatorFlag(RS.getString(25));
-				addy.setGateFlag(RS.getString(26));
-				addy.setGateInstructions(RS.getString(27));
-				addy.setCreatedBy(RS.getString(28));
-				addy.setLastUpdatedBy(RS.getString(29));
-				addy.setLastUpdatedDate(RS.getString(30));
+				donor.setPhoneOther(RS.getString(11));
+				
+				addy.setAddressId(RS.getLong(12));
+				addy.setDonorId(RS.getLong(13));
+				addy.setLine1(RS.getString(14));
+				addy.setLine2(RS.getString(15));
+				addy.setCity(RS.getString(16));
+				addy.setState(RS.getString(17));
+				addy.setZipcode(RS.getString(18));
+				addy.setMajorIntersection(RS.getString(19));
+				addy.setSubdivision(RS.getString(20));
+				addy.setStreetSuffix(RS.getString(21));
+				addy.setStructureType(RS.getString(22));
+				addy.setUnit(RS.getString(23));
+				addy.setBuilding(RS.getString(24));
+				addy.setFloor(RS.getString(25));
+				addy.setElevatorFlag(RS.getString(26));
+				addy.setGateFlag(RS.getString(27));
+				addy.setGateInstructions(RS.getString(28));
+				addy.setCreatedBy(RS.getString(29));
+				addy.setLastUpdatedBy(RS.getString(30));
+				addy.setLastUpdatedDate(RS.getString(31));
 
 				results1.add(donor);
 				results2.add(addy);
@@ -273,10 +278,11 @@ public class DispatchDao {
 
 			StringBuffer query = new StringBuffer();
 			query.append("UPDATE " + this.getDatabase() + ".DONOR SET ");
-			query.append(" LASTNAME='" + donor.getLastname() + "',");
-			query.append(" FIRSTNAME='" + donor.getFirstname() + "',");
+			query.append(" LASTNAME='" + Validator.cleanForSql(donor.getLastname()) + "',");
+			query.append(" FIRSTNAME='" + Validator.cleanForSql(donor.getFirstname()) + "',");
 			query.append(" SUFFIX='" + donor.getSuffix() + "',");
 			query.append(" CONTACT_PHONE='" + donor.getContactPhone() + "',");
+			query.append(" PHONE_OTHER='" + donor.getPhoneOther() + "',");
 			query.append(" EMAIL_ADDRESS='" + donor.getEmailAddress() + "',");
 			query.append(" LAST_UPDATED_DATE='" + donor.getLastUpdatedDate()
 					+ "',");
@@ -402,6 +408,12 @@ public class DispatchDao {
 					+ "', ");
 			query.append(" SPECIAL_NOTES='" + d.getSpecialNotes() + "', ");
 			query.append(" LAST_UPDATED_DATE='" + d.getLastUpdatedDate()
+					+ "', ");
+			query.append(" MISC_HOUSEHOLD_ITEM_QTY_SIZE='" + d.getMiscHouseholdItemsQtySize()
+					+ "', ");
+			query.append(" WALL_UNIT_QTY_SIZE='" + d.getWallUnitQtySize()
+					+ "', ");
+			query.append(" GATE_CODE='" + d.getCallBoxCode()
 					+ "', ");
 			query.append(" UPDATED_BY='" + d.getUpdatedBy()
 					+ "' WHERE DONATION_ID=" + d.getDonationId());
@@ -721,6 +733,24 @@ public class DispatchDao {
 				else
 					value = RS.getString(54);
 				d.setOttoman(value);
+				
+				if (RS.getString(55) == null)
+					value = "";
+				else
+					value = RS.getString(55);
+				d.setMiscHouseholdItemsQtySize(value);
+				
+				if (RS.getString(56) == null)
+					value = "";
+				else
+					value = RS.getString(56);
+				d.setWallUnitQtySize(value);
+				
+				if (RS.getString(57) == null)
+					value = "";
+				else
+					value = RS.getString(57);
+				d.setCallBoxCode(value);
 			}
 			RS.close();
 			Stmt.close();
@@ -728,6 +758,7 @@ public class DispatchDao {
 		} catch (SQLException E) {
 			retCode = 0;
 			session.setAttribute("SYSTEM_ERROR", E.getMessage());
+			E.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			retCode = 0;
 			session.setAttribute("SYSTEM_ERROR", e.getMessage());
@@ -817,6 +848,10 @@ public class DispatchDao {
 		int retCode = 1;
 		ArrayList results = new ArrayList();
 		SystemUser user = (SystemUser)session.getAttribute("USER_"+session.getId());
+		
+		lastname = Validator.cleanForSql(lastname);
+		firstname = Validator.cleanForSql(firstname);
+		
 		try {
 
 			Connection Conn = this.getConnection();
@@ -843,7 +878,7 @@ public class DispatchDao {
 				s.append("AND DONATION.STATUS='" + status + "'  ");
 			if (special!=null&&special.length() > 0)
 				s.append("AND DONATION.SPECIAL_FLAG='" + special + "'  ");
-			s.append("AND DONATION.FARM_BASE='"+user.getFarmBase().toUpperCase().toUpperCase()+"'  ");
+			s.append("AND DONATION.FARM_BASE='"+user.getFarmBase().toUpperCase().toUpperCase()+"' ORDER BY ZIPCODE  ");
 			ResultSet RS = Stmt.executeQuery(s.toString());
 			while (RS.next()) {
 				Donation d = new Donation();
@@ -902,38 +937,43 @@ public class DispatchDao {
 				d.setBookcase(RS.getString(53));
 				d.setOttoman(RS.getString(54));
 				
+				d.setMiscHouseholdItemsQtySize(RS.getString(55));
+				d.setWallUnitQtySize(RS.getString(56));
+				d.setCallBoxCode(RS.getString(57));
+				
 				Donor donor = new Donor();
-				donor.setDonorId(RS.getLong(55));
-				donor.setLastname(RS.getString(56));
-				donor.setFirstname(RS.getString(57));
-				donor.setSuffix(RS.getString(58));
-				donor.setContactPhone(RS.getString(59));
-				donor.setEmailAddress(RS.getString(60));
-				donor.setCreationDate(RS.getString(61));
-				donor.setLastUpdatedDate(RS.getString(62));
-				donor.setCreatedBy(RS.getString(63));
-				donor.setUdpatedBy(RS.getString(64));
+				donor.setDonorId(RS.getLong(58));
+				donor.setLastname(RS.getString(59));
+				donor.setFirstname(RS.getString(60));
+				donor.setSuffix(RS.getString(61));
+				donor.setContactPhone(RS.getString(62));
+				donor.setEmailAddress(RS.getString(63));
+				donor.setCreationDate(RS.getString(64));
+				donor.setLastUpdatedDate(RS.getString(65));
+				donor.setCreatedBy(RS.getString(66));
+				donor.setUdpatedBy(RS.getString(67));
+				donor.setPhoneOther(RS.getString(68));
 
 				Address addy = new Address();
-				addy.setAddressId(RS.getLong(65));
-				addy.setDonorId(RS.getLong(66));
-				addy.setLine1(RS.getString(67));
-				addy.setLine2(RS.getString(68));
-				addy.setCity(RS.getString(69));
-				addy.setState(RS.getString(70));
-				addy.setZipcode(RS.getString(71));
-				addy.setMajorIntersection(RS.getString(72));
-				addy.setSubdivision(RS.getString(73));
-				addy.setStreetSuffix(RS.getString(74));
-				addy.setStructureType(RS.getString(75));
-				addy.setUnit(RS.getString(76));
-				addy.setBuilding(RS.getString(77));
-				addy.setFloor(RS.getString(78));
-				addy.setElevatorFlag(RS.getString(79));
-				addy.setGateFlag(RS.getString(80));
-				addy.setGateInstructions(RS.getString(81));
-				addy.setCreatedBy(RS.getString(82));
-				addy.setLastUpdatedBy(RS.getString(83));
+				addy.setAddressId(RS.getLong(69));
+				addy.setDonorId(RS.getLong(70));
+				addy.setLine1(RS.getString(71));
+				addy.setLine2(RS.getString(72));
+				addy.setCity(RS.getString(73));
+				addy.setState(RS.getString(74));
+				addy.setZipcode(RS.getString(75));
+				addy.setMajorIntersection(RS.getString(76));
+				addy.setSubdivision(RS.getString(77));
+				addy.setStreetSuffix(RS.getString(78));
+				addy.setStructureType(RS.getString(79));
+				addy.setUnit(RS.getString(80));
+				addy.setBuilding(RS.getString(81));
+				addy.setFloor(RS.getString(82));
+				addy.setElevatorFlag(RS.getString(83));
+				addy.setGateFlag(RS.getString(84));
+				addy.setGateInstructions(RS.getString(85));
+				addy.setCreatedBy(RS.getString(86));
+				addy.setLastUpdatedBy(RS.getString(87));
 
 				d.setDonor(donor);
 				d.setAddress(addy);
@@ -948,6 +988,7 @@ public class DispatchDao {
 		} catch (SQLException E) {
 			retCode = 0;
 			session.setAttribute("SYSTEM_ERROR", E.getMessage());
+			E.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			retCode = 0;
 			session.setAttribute("SYSTEM_ERROR", e.getMessage());
@@ -1178,7 +1219,7 @@ public class DispatchDao {
 	}
 
 	public Long insertDonation(Donor donor, Address addy, Donation d,
-			HttpSession session) {
+			SystemUser user, HttpSession session) {
 
 		int retCode = 0;
 		long confirmation = 0;
@@ -1187,7 +1228,7 @@ public class DispatchDao {
 		try {
 
 			if (donor.getDonorId() == null) {
-				Long rc = this.insertDonor(donor, session);
+				Long rc = this.insertDonor(donor, user, session);
 				donor.setDonorId(rc);
 				addy.setDonorId(rc);
 
@@ -1201,8 +1242,14 @@ public class DispatchDao {
 					if (rc == 0)
 						return rc;
 				}
+			} else {
+				//update donor and address
+				this.updateDonor(donor, session);
+				this.updateAddress(addy, session);
 			}
 			Connection Conn = this.getConnection();
+			Conn.setAutoCommit(false);
+			Conn.setTransactionIsolation(Conn.TRANSACTION_SERIALIZABLE);
 
 			// Do something with the Connection
 			Statement Stmt = Conn.createStatement();
@@ -1213,16 +1260,13 @@ public class DispatchDao {
 			query.append(" CLOTHING, CLOTHING_QTY_TYPE, COMPUTER, DESK, CHEST, ARMOIRE, DRESSER, MIRROR, NIGHTSTAND, HEADBOARD, FOOTBOARD, RAILS, ");
 			query.append(" LAMP, LAWN_FURNITURE, MATTRESS, MATTRESS_QTY_SIZE, MISC_HOUSEHOLD_ITEMS, REFRIDGERATOR, STOVE, RECLINER, SOFA, LOVESEAT, ");
 			query.append(" WALL_UNIT, TABLES, TABLE_TYPE, CHAIR, CHAIR_TYPE, TELEVISION, TELEVISION_SIZE, ELECTRONICS, WASHER, DRYER, EXERCISE_EQUIPMENT, BOOKCASE, OTTOMAN, SPECIAL_NOTES, ");
-			query.append(" CREATION_DATE, CREATED_BY, FARM_BASE) VALUES (");
+			query.append(" MISC_HOUSEHOLD_ITEM_QTY_SIZE, WALL_UNIT_QTY_SIZE, GATE_CODE, CREATION_DATE, CREATED_BY, FARM_BASE) VALUES (");
 
 			query.append(d.getDonorId() + ",");
 			query.append("'" + d.getDispatchDate() + "',");
 			query.append("'" + d.getLocation() + "',");
 			query.append("'" + d.getStatus().toUpperCase() + "',");
-			if (d.getSpecialFlag() == null || "".equals(d.getSpecialFlag())) {
-				query.append("'NO',");
-			} else
-				query.append("'YES',");
+			query.append("'"+d.getSpecialFlag()+"',");
 			query.append("'" + d.getCallRequirements() + "',");
 			query.append("'" + d.getAc() + "',");
 			query.append("'" + d.getBedding() + "',");
@@ -1265,6 +1309,9 @@ public class DispatchDao {
 			query.append("'" + d.getBookcase() + "',");
 			query.append("'" + d.getOttoman() + "',");
 			query.append("'" + d.getSpecialNotes() + "',");
+			query.append("'" + d.getMiscHouseholdItemsQtySize() + "',");
+			query.append("'" + d.getWallUnitQtySize() + "',");
+			query.append("'" + d.getCallBoxCode() + "',");
 			query.append("'" + valid8r.getEpoch() + "',");
 			query.append("'" + d.getCreatedBy() + "', ");
 			query.append("'" + d.getFarmBase().toUpperCase() + "' );");
@@ -1282,6 +1329,7 @@ public class DispatchDao {
 			session.setAttribute("temp_address",addy );
 			
 			// Clean up after ourselves
+			Conn.commit();
 			Stmt.close();
 			Conn.close();
 		} catch (SQLException E) {
@@ -1295,7 +1343,7 @@ public class DispatchDao {
 
 	}
 
-	public Long insertDonor(Donor d, HttpSession session) {
+	public Long insertDonor(Donor d, SystemUser user, HttpSession session) {
 
 		Long key = new Long("0");
 
@@ -1305,15 +1353,21 @@ public class DispatchDao {
 
 			StringBuffer query = new StringBuffer();
 			query.append("INSERT INTO " + this.getDatabase() + ".DONOR (");
-			query.append(" LASTNAME, FIRSTNAME, SUFFIX, CONTACT_PHONE, EMAIL_ADDRESS, CREATION_DATE, CREATED_BY ) VALUES (");
-			query.append("'" + d.getLastname() + "',");
-			query.append("'" + d.getFirstname() + "',");
+			query.append(" LASTNAME, FIRSTNAME, SUFFIX, CONTACT_PHONE, PHONE_OTHER, EMAIL_ADDRESS, CREATION_DATE, CREATED_BY ) VALUES (");
+			query.append("'" + Validator.cleanForSql(d.getLastname()) + "',");
+			query.append("'" + Validator.cleanForSql(d.getFirstname()) + "',");
 			query.append("'" + d.getSuffix() + "',");
 			query.append("'" + d.getContactPhone() + "',");
+			query.append("'" + d.getPhoneOther() + "',");
 			query.append("'" + d.getEmailAddress() + "',");
 			query.append("'" + valid8r.getEpoch() + "',");
-			query.append("'" + d.getCreatedBy() + "');");
+			query.append("'" + user.getUsername() + "');");
 			PreparedStatement Stmt = null;
+			
+			/* do transaction */
+			Conn.setAutoCommit(false);
+			Conn.setTransactionIsolation(Conn.TRANSACTION_SERIALIZABLE);
+			
 			Stmt = Conn.prepareStatement(query.toString(),
 					Stmt.RETURN_GENERATED_KEYS);
 			Stmt.executeUpdate(query.toString());
@@ -1324,6 +1378,7 @@ public class DispatchDao {
 				key = generatedKeys.getLong(1);
 
 			// Clean up after ourselves
+			Conn.commit();
 			Stmt.close();
 			Conn.close();
 		} catch (SQLException E) {
@@ -1342,6 +1397,9 @@ public class DispatchDao {
 		try {
 
 			Connection Conn = this.getConnection();
+			Conn.setAutoCommit(false);
+			Conn.setTransactionIsolation(Conn.TRANSACTION_SERIALIZABLE);
+
 			// Do something with the Connection
 
 			StringBuffer query = new StringBuffer();
@@ -1377,6 +1435,7 @@ public class DispatchDao {
 				key = generatedKeys.getLong(1);
 
 			// Clean up after ourselves
+			Conn.commit();
 			Stmt.close();
 			Conn.close();
 		} catch (SQLException E) {

@@ -391,6 +391,7 @@ public class DispatchServlet extends HttpServlet {
 			String update = req.getParameter("update");
 			if (update==null) update="";
 			pass1 = validateTicket(req);
+			
 			donation.setCreationDate(valid8r.getEpoch()+"");
 			donation.setCreatedBy(user.getUsername());
 			donation.setStatus("Pending");
@@ -399,7 +400,7 @@ public class DispatchServlet extends HttpServlet {
 			address.setCreatedBy(user.getUsername());
 			 
 			if (pass1) {
-				Long key=dao.insertDonation(donor, address, donation, session);
+				Long key=dao.insertDonation(donor, address, donation, user, session);
 				if (key<1)
 					url="error.jsp";
 				else {
@@ -779,6 +780,26 @@ public class DispatchServlet extends HttpServlet {
 					success = false;
 			}
 		
+		if (this.getDonation().getSpecialFlag()==null||this.getDonation().getSpecialFlag().length()==0)
+			this.getDonation().setSpecialFlag("NO");
+		
+		/*
+		 * Check if ticket limit is not met
+		 * 
+		 */
+		GregorianCalendar calendar = new GregorianCalendar();
+		
+		Date now = calendar.getTime();
+		DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+		DateFormat df2 = new SimpleDateFormat("EEEE");
+		int limit = dao.getDailyLimit(this.getDonation().getDispatchDate(), req.getSession());
+		int count = dao.getDailyDispatchCount(this.getDonation().getDispatchDate(), req.getSession());
+		if (count>=limit) {
+			fieldErr = "Ticket limit for "+this.getDonation().getDispatchDate()+" has been reached.  Please select another date";
+			req.setAttribute("field13Err", fieldErr);
+			success = false;
+			}
+		
 		return success;
 	}
 
@@ -797,7 +818,13 @@ public class DispatchServlet extends HttpServlet {
 		String phone3 = valid8r.cleanData(req.getParameter("phone3"));
 		String phone = "(" + phone1 + ")" + phone2 + "-" + phone3;
 
+		String phone4 = valid8r.cleanData(req.getParameter("phone4"));
+		String phone5 = valid8r.cleanData(req.getParameter("phone5"));
+		String phone6 = valid8r.cleanData(req.getParameter("phone6"));
+		String phoneOther = "(" + phone4 + ")" + phone5 + "-" + phone6;
+
 		this.getDonor().setContactPhone(phone);
+		this.getDonor().setPhoneOther(phoneOther);
 		this.getDonor().setEmailAddress(
 				valid8r.cleanData(req.getParameter("email")));
 		this.getAddress()
@@ -830,6 +857,7 @@ public class DispatchServlet extends HttpServlet {
 		this.getAddress().setGateInstructions(
 				valid8r.cleanData(req.getParameter("gateInstructions")));
 		this.getDonation().setSpecialFlag(valid8r.cleanData(req.getParameter("specialFlag")));
+		
 		this.getDonation().setCallRequirements(valid8r.cleanData(req.getParameter("callRequirements")));
 		this.getDonation().setStatus(valid8r.cleanData(req.getParameter("status")));
 		this.getDonation().setDispatchDate(valid8r.cleanData(req.getParameter("dispatchDate")));
@@ -879,6 +907,9 @@ public class DispatchServlet extends HttpServlet {
 		this.getDonation().setSpecialNotes(valid8r.cleanData(req.getParameter("specialNotes")));
 		this.getDonation().setBookcase(valid8r.cleanData(req.getParameter("bookcase")));
 		this.getDonation().setOttoman(valid8r.cleanData(req.getParameter("ottoman")));
+		this.getDonation().setCallBoxCode(valid8r.cleanData(req.getParameter("callBoxCode")));
+		this.getDonation().setMiscHouseholdItemsQtySize(valid8r.cleanData(req.getParameter("miscHouseholdItemsQtySize")));
+		this.getDonation().setWallUnitQtySize(valid8r.cleanData(req.getParameter("wallUnitQtySize")));
 	} 
 
 	public static Donor getDonor() {

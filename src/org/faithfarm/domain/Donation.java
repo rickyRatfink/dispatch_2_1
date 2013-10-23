@@ -59,6 +59,10 @@ public class Donation implements Serializable {
 	private String chairType="";
 	private String bookcase="";
 	private String ottoman="";
+	private String miscHouseholdItemsQtySize="";
+	private String wallUnitQtySize="";
+	private String callBoxCode="";
+	
 	
 	private   Donor donor=new Donor();
 	private   Address address=new Address();
@@ -397,6 +401,24 @@ public class Donation implements Serializable {
 	}
 	public void setOttoman(String ottoman) {
 		this.ottoman = ottoman;
+	}
+	public String getMiscHouseholdItemsQtySize() {
+		return miscHouseholdItemsQtySize;
+	}
+	public void setMiscHouseholdItemsQtySize(String miscHouseholdItemsQtySize) {
+		this.miscHouseholdItemsQtySize = miscHouseholdItemsQtySize;
+	}
+	public String getWallUnitQtySize() {
+		return wallUnitQtySize;
+	}
+	public void setWallUnitQtySize(String wallUnitQtySize) {
+		this.wallUnitQtySize = wallUnitQtySize;
+	}
+	public String getCallBoxCode() {
+		return callBoxCode;
+	}
+	public void setCallBoxCode(String callBoxCode) {
+		this.callBoxCode = callBoxCode;
 	}
 	
 	

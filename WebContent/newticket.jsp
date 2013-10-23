@@ -239,7 +239,6 @@ $(document).ready(function() {
 	if (f20Err==null) f20Err="";	
 	if (f21Err==null) f21Err="";	
 	
-	
 	String message=(String)request.getAttribute("MESSAGE");	
 	if (message==null) message="";
 %>
@@ -253,16 +252,18 @@ function ucase(obj) {
 <form method="POST" action="<%=request.getContextPath()%>/ticket"> 
 			<tr>
 				<td width="100%" align="center" valign="center" border="0" bgcolor="#FFFFFF">
+						
                         <h1>Donor Information<% if ("Y".equals(update)) { %>&nbsp;<i>(Confirmation #<%=DispatchServlet.getDonation().getDonationId() %>)</i>
                         <a href="<%=request.getContextPath()%>/print_ticket.jsp"><img src="images/printer.png" height="20" width="20" title="Print Donation Ticket" alt="Print Dispatches"/></a>
                         <%}%></h1>
                         <% if (message.length()>0) { %>
                         <h5><img src="images/success.png"/><%=message %></h5>
                         <% } %>
+                        
                 		<table width="95%" cellpadding="0" cellspacing="0" border="0">
                         	<tr>
-                            	<td class="fieldHeading" >Last Name<%=required%></td> 
-                                <td class="fieldHeading" >First Name<%=required%></td>
+                            	<td class="fieldHeading" >First Name<%=required%></td>
+                                <td class="fieldHeading" >Last Name<%=required%></td> 
                                 <td class="fieldHeading">Suffix</td>
                                 <td></td>
                             </tr>
@@ -387,8 +388,11 @@ function ucase(obj) {
                         <table width="95%" cellpadding="0" cellspacing="0" border="0">
                         	<tr>
                             	<td class="fieldHeading" >Contact Phone<%=required%></td>
+                            	<td width="30"></td>
+                            	<td class="fieldHeading" >Alternative Phone</td>
+                            	<td width="30"></td>
                                 <td class="fieldHeading" >Email Address</td>
-                                <td width="40%"></td>
+                                <td width="20%"></td>
                             </tr>
                            
                             <tr>
@@ -397,6 +401,13 @@ function ucase(obj) {
                                 	<input id="phone2" type="text" size="3" maxlength="3" name="phone2" onkeyup="moveOnMax(this,'phone3')" onKeyPress="return isNumberKey(event)"  <% if (f10Err.length()>0){%> class="textboxErr"<% } else { %> class="textbox"<%}%>  <% if (DispatchServlet.getDonor().getContactPhone().length()==13 ) { %>value="<%=DispatchServlet.getDonor().getContactPhone().substring(5,8)%>"<%}%>/>-
                                 	<input id="phone3" type="text" size="4" maxlength="4" name="phone3" onKeyPress="return isNumberKey(event)" <% if (f10Err.length()>0){%> class="textboxErr"<% } else { %> class="textbox"<%}%>  <% if (DispatchServlet.getDonor().getContactPhone().length()==13 ) { %>value="<%=DispatchServlet.getDonor().getContactPhone().substring(9,13)%>"<%}%>/>
                                 </td>
+                                <td></td>
+                                <td>
+                                	(<input id="phone4" type="text" size="3" maxlength="3" name="phone4" onkeyup="moveOnMax(this,'phone5')" onKeyPress="return isNumberKey(event)"  class="textbox" <% if (DispatchServlet.getDonor().getPhoneOther()!=null&&DispatchServlet.getDonor().getPhoneOther().length()==13 ) { %>value="<%=DispatchServlet.getDonor().getPhoneOther().substring(1,4)%>"<%}%>/>)
+                                	<input id="phone5" type="text" size="3" maxlength="3" name="phone5" onkeyup="moveOnMax(this,'phone6')" onKeyPress="return isNumberKey(event)"   class="textbox"  <% if (DispatchServlet.getDonor().getPhoneOther()!=null&&DispatchServlet.getDonor().getPhoneOther().length()==13 ) { %>value="<%=DispatchServlet.getDonor().getPhoneOther().substring(5,8)%>"<%}%>/>-
+                                	<input id="phone6" type="text" size="4" maxlength="4" name="phone6" onKeyPress="return isNumberKey(event)"  class="textbox"  <% if (DispatchServlet.getDonor().getPhoneOther()!=null&&DispatchServlet.getDonor().getPhoneOther().length()==13 ) { %>value="<%=DispatchServlet.getDonor().getPhoneOther().substring(9,13)%>"<%}%>/>
+                                </td>
+                                <td></td>
                                 <td><input type="text" size="50" name="email" maxlength="50" value="<%=DispatchServlet.getDonor().getEmailAddress() %>" <% if (f11Err.length()>0){%> class="textboxErr"<% } else { %> class="textbox"<%}%> onkeyup="ucase(this)"/></td>
                                 <td></td>
                             </tr>
@@ -590,6 +601,19 @@ function ucase(obj) {
                             
                          </table>
                          
+                          <table width="95%" cellpadding="0" cellspacing="0" border="0">
+                         	<tr>
+                            	<td class="fieldHeading" >Gate Instructions</td>
+                            </tr>
+                            <tr>
+                            	<td class="fieldHeading" >
+                            	<input 
+                                      name="callBoxCode"
+                                      size="20" maxlength="20"
+                                      value="<%=DispatchServlet.getDonation().getCallBoxCode()%>" class="textbox"/>
+                                  </td>
+                            </tr>
+                         
                         <table>
                         <tr>
             				<td height="20" bgcolor="#FFFFFF"></td>
@@ -639,6 +663,7 @@ function ucase(obj) {
                                       name="dispatchDate"
                                       size="12" class="tcal"
                                       value="<%=DispatchServlet.getDonation().getDispatchDate()%>"
+                                      <% if (f13Err.length()>0) { %> style="background-color: #f8b81f" <% } %>
                                   />
                                   </td>
                             </tr>
@@ -685,7 +710,7 @@ function ucase(obj) {
                             
                             <table width="95%" cellpadding="0" cellspacing="0" border="0">
                             <tr>
-                            	<td width="5" class="fieldHeading" ><input type="checkbox" name="specialFlag" value="Y" <% if (DispatchServlet.getDonation().getSpecialFlag().equals("Y")) {%>checked<%}%>/></td>
+                            	<td width="5" class="fieldHeading" ><input type="checkbox" name="specialFlag" value="YES" <% if (DispatchServlet.getDonation().getSpecialFlag().equals("YES")) {%>checked<%}%>/></td>
                                 <td class="fieldHeading" >Check if this donation is a special</td>
                             </tr> 
                          </table>
@@ -896,7 +921,37 @@ function ucase(obj) {
 									  </select>    
                                 </td>
                           		<td class="itemName">Misc Household Items</td>
-                                <td class="itemQuantity"><input type="text" name="miscHouseholdItems" value="<%=DispatchServlet.getDonation().getMiscHouseholdItems() %>" size="2" maxlength="2" class="textbox" /></td>
+                                <td class="itemQuantity">
+                                	<input type="text" name="miscHouseholdItems" value="<%=DispatchServlet.getDonation().getMiscHouseholdItems() %>" size="2" maxlength="2" class="textbox" />
+                                 	<%
+                                     ddl = (ArrayList)session.getAttribute("dllQtyType");
+									  %>
+									  <select name="miscHouseholdItemsQtySize" <% if (f20Err.length()>0) { %>class="ddlErr"<% } else { %> class="ddl" <%}%>>
+										<option value="">Packing Type
+										</option>
+										<%
+										if (ddl!=null) {
+										  for (int j=0;j<ddl.size();j++) {
+											%>
+											<option 
+												value="<%=ddl.get(j)%>"
+												<%
+												if
+												(ddl.get(j).equals(DispatchServlet.getDonation().getMiscHouseholdItemsQtySize()))
+												{%>selected<%}%>>
+	
+	
+											  <%=ddl.get(j)%>
+											</option>
+											<%
+										  }
+										  %>
+										  <%
+										}
+										%>
+									  </select>
+                                	
+                                </td>
                                 <td></td>
                               </tr>
                               <tr><td colspan="6" height="1"></td></tr>
@@ -916,7 +971,37 @@ function ucase(obj) {
                                 <td class="itemName">Loveseat</td>
                                 <td class="itemQuantity"><input type="text" name="loveseat" value="<%=DispatchServlet.getDonation().getLoveseat() %>" size="2" maxlength="2" class="textbox" /></td>
                           		<td class="itemName">Wall Unit</td>
-                                <td class="itemQuantity"><input type="text" name="wallUnit" value="<%=DispatchServlet.getDonation().getWallUnit() %>" size="2" maxlength="2" class="textbox" /></td>
+                                <td class="itemQuantity">
+                                	<input type="text" name="wallUnit" value="<%=DispatchServlet.getDonation().getWallUnit() %>" size="2" maxlength="2" class="textbox" />
+                                
+                                	<select name="wallUnitQtySize" <% if (f17Err.length()>0){%> class="ddlErr"<% } else { %> class="ddl"<%}%>>
+                                    <option value="">Pieces
+                                    </option>
+                                    <%
+                                    ddl = (ArrayList)session.getAttribute("dllPieces");
+                                    
+                                    if (ddl!=null) {
+                                      for (int j=0;j<ddl.size();j++) {
+                                        %>
+                                        <option 
+                                            value="<%=ddl.get(j)%>"
+                                            <% 
+                                            if
+                                            (ddl.get(j).equals(DispatchServlet.getDonation().getWallUnitQtySize()))
+                                            {%>selected<%}%>>
+
+
+                                          <%=ddl.get(j)%>
+                                        </option>
+                                        <%
+                                      }
+                                      %>
+                                      <%
+                                    }
+                                    %>
+                                  </select>
+                                
+                                </td>
                                 <td></td>
                               </tr>
                               <tr><td colspan="6" height="1"></td></tr>

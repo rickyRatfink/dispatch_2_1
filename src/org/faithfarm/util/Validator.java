@@ -54,7 +54,13 @@ public class Validator {
 	   public static String cleanData(String value) {
 		   if (value == null||value.equals("null")) {
 		      return "";
-		   }
+		   } 
+		   return value;
+	   }
+	   
+	   public static String cleanForSql(String value) {
+		   if (value != null) 
+			   value=value.replace("'", "''");
 		   return value;
 	   }
 	   

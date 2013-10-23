@@ -237,6 +237,18 @@ public class SecureLogin extends HttpServlet {
 	        ArrayList qtyType = new ArrayList();
 	        qtyType.add("boxes");
 	        qtyType.add("bags");
+
+	        ArrayList pieces = new ArrayList();
+	        pieces.add("1 piece");
+	        pieces.add("2 pieces");
+	        pieces.add("3 pieces");
+	        pieces.add("4 pieces");
+	        pieces.add("5 pieces");
+	        pieces.add("6 pieces");
+	        pieces.add("7 pieces");
+	        pieces.add("8 pieces");
+	        pieces.add("9 pieces");
+	        pieces.add("10 pieces");
 	        
 	        ArrayList mattress = new ArrayList();
 	        mattress.add("twin");
@@ -287,6 +299,7 @@ public class SecureLogin extends HttpServlet {
 	        session.setAttribute("dllTvSize",convertToUpperCase(tvsize));
 	        session.setAttribute("dllTableType",convertToUpperCase(tableType));
 	        session.setAttribute("dllChairType",convertToUpperCase(chairType));
+	        session.setAttribute("dllPieces",convertToUpperCase(pieces));
 	        
 	   }
 	   
